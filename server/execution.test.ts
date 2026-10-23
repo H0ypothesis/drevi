@@ -74,7 +74,7 @@ async function setup(
   sandboxed = false,
 ) {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-execution-")),
+    await mkdtemp(join(tmpdir(), "drevi-execution-")),
   );
   const project = join(directory, "project");
   await mkdir(project);
@@ -95,7 +95,7 @@ async function setup(
   faux.setResponses(responses);
   registry.setProvider(faux.provider);
   const runtime = new LocalPiRuntime(registry);
-  // Legacy approval cases represent capabilities without Panel's trusted
+  // Legacy approval cases represent capabilities without Drevi's trusted
   // sandbox marker, including extensions with the same tool names.
   if (!sandboxed) {
     const run = runtime.run.bind(runtime);

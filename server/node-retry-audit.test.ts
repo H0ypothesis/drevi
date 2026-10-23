@@ -27,7 +27,7 @@ async function until(check: () => boolean) {
 
 test("cancelling a file tool during safety review retains proof that no file effect was dispatched", async (t) => {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-retry-audit-")),
+    await mkdtemp(join(tmpdir(), "drevi-retry-audit-")),
   );
   const project = join(directory, "project");
   await mkdir(project);
@@ -120,7 +120,7 @@ test("cancelling a file tool during safety review retains proof that no file eff
 
 async function restoreReservationFixture(t: TestContext) {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-retry-lock-")),
+    await mkdtemp(join(tmpdir(), "drevi-retry-lock-")),
   );
   const project = join(directory, "project");
   await mkdir(project);

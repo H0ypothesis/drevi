@@ -52,7 +52,7 @@ async function afterRunSettles<T>(run: () => Promise<T>): Promise<T> {
 }
 
 async function fixture(t: TestContext) {
-  const directory = await mkdtemp(join(tmpdir(), "panel-attachment-flow-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-attachment-flow-"));
   const store = new Store(directory);
   await store.init(false);
   const workspace: StoredWorkspace = createWorkspace(

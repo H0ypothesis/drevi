@@ -162,8 +162,8 @@ async function mount(t, { models, state = fixture() } = {}) {
   };
   window.HTMLElement.prototype.scrollTo = function () {};
   window.HTMLElement.prototype.scrollIntoView = function () {};
-  window.localStorage.setItem("panel:workspace", "cua");
-  window.localStorage.setItem("panel:node", "cua-node");
+  window.localStorage.setItem("drevi:workspace", "cua");
+  window.localStorage.setItem("drevi:node", "cua-node");
   const streams = new Set();
   window.EventSource = class extends window.EventTarget {
     constructor() {

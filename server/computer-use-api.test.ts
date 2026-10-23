@@ -64,7 +64,7 @@ const node = (id: string, revision?: number): StoredNode => ({
 });
 
 async function fixture(t: TestContext) {
-  const directory = await mkdtemp(join(tmpdir(), "panel-computer-api-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-computer-api-"));
   const store = new Store(directory);
   await store.init(false);
   const current = node("current", 2);

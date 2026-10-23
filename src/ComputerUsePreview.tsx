@@ -130,8 +130,8 @@ export function ComputerUsePreview({
 
   useEffect(() => {
     const closed = () => toggle(false);
-    window.addEventListener("panel:preview-closed", closed);
-    return () => window.removeEventListener("panel:preview-closed", closed);
+    window.addEventListener("drevi:preview-closed", closed);
+    return () => window.removeEventListener("drevi:preview-closed", closed);
   }, []);
 
   useEffect(() => {

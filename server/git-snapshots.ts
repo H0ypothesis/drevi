@@ -117,10 +117,10 @@ function gitEnvironment(index?: string): NodeJS.ProcessEnv {
     GIT_CONFIG_SYSTEM: "/dev/null",
     GIT_TERMINAL_PROMPT: "0",
     GIT_OPTIONAL_LOCKS: "0",
-    GIT_AUTHOR_NAME: "Panel",
-    GIT_AUTHOR_EMAIL: "snapshots@panel.local",
-    GIT_COMMITTER_NAME: "Panel",
-    GIT_COMMITTER_EMAIL: "snapshots@panel.local",
+    GIT_AUTHOR_NAME: "Drevi",
+    GIT_AUTHOR_EMAIL: "snapshots@drevi.local",
+    GIT_COMMITTER_NAME: "Drevi",
+    GIT_COMMITTER_EMAIL: "snapshots@drevi.local",
     ...(index ? { GIT_INDEX_FILE: index } : {}),
   };
 }
@@ -285,7 +285,7 @@ export class GitSnapshots {
       repository,
       tree,
       previous || undefined,
-      "Panel: before file operation",
+      "Drevi: before file operation",
       deadline,
       permissions,
       scope === undefined,
@@ -554,7 +554,7 @@ export class GitSnapshots {
       const absolute = join(plan.workingDirectory, file.path);
       const temporary = join(
         dirname(absolute),
-        `.panel-restore-${plan.id}-${createHash("sha256").update(file.path).digest("hex").slice(0, 16)}`,
+        `.drevi-restore-${plan.id}-${createHash("sha256").update(file.path).digest("hex").slice(0, 16)}`,
       );
       // A crash before rename can leave an incomplete staging file. Its name
       // belongs to this durable plan, so replay can discard and rebuild it.
@@ -656,9 +656,15 @@ export class GitSnapshots {
     try {
       const permissions = JSON.parse(
         await readFile(
-          join(repository, "panel-permissions", `${commit}.json`),
+          join(repository, "drevi-permissions", `${commit}.json`),
           "utf8",
-        ),
+        ).catch((error: NodeJS.ErrnoException) => {
+          if (error.code !== "ENOENT") throw error;
+          return readFile(
+            join(repository, "panel-permissions", `${commit}.json`),
+            "utf8",
+          );
+        }),
       ) as Record<string, number>;
       if (
         !permissions ||
@@ -898,11 +904,11 @@ export class GitSnapshots {
         ],
         deadline,
         {
-          input: `${message.slice(0, 4096)}\n${updateHead ? "" : `\nPanel operation: ${randomUUID()}\n`}`,
+          input: `${message.slice(0, 4096)}\n${updateHead ? "" : `\nDrevi operation: ${randomUUID()}\n`}`,
         },
       )
     ).trim();
-    const permissionsDirectory = join(repository, "panel-permissions");
+    const permissionsDirectory = join(repository, "drevi-permissions");
     await mkdir(permissionsDirectory, { recursive: true, mode: 0o700 });
     await writeFile(
       join(permissionsDirectory, `${commit}.json`),
@@ -1198,7 +1204,7 @@ export class GitSnapshots {
         }
         if (!exists) {
           await mkdir(objectDirectory, { recursive: true });
-          const temporary = join(objectDirectory, `panel-${randomUUID()}`);
+          const temporary = join(objectDirectory, `drevi-${randomUUID()}`);
           try {
             await writeFile(temporary, await compress(object), {
               mode: 0o600,
@@ -1212,7 +1218,7 @@ export class GitSnapshots {
         entries.push(`${mode} ${hash}\t${path}\0`);
       }
     }
-    const index = join(repository, `panel-index-${randomUUID()}`);
+    const index = join(repository, `drevi-index-${randomUUID()}`);
     try {
       await git([`--git-dir=${repository}`, "read-tree", "--empty"], deadline, {
         index,

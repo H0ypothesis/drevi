@@ -36,7 +36,7 @@ export function xiaomiTokenPlanProvider() {
       input: id === "mimo-v2.5-pro" ? ["text"] : ["text", "image"],
       contextWindow: 1048576,
       maxTokens: 131072,
-      // Subscription usage has no per-request cost estimate in Panel.
+      // Subscription usage has no per-request cost estimate in Drevi.
       cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
       compat: {
         thinkingFormat: "deepseek",

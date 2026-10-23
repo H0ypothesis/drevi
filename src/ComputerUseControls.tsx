@@ -41,7 +41,7 @@ export function ComputerUseControls({
       if (reason instanceof ApiError && reason.status === 404) {
         setUnsupported(true);
         setError(
-          "当前连接的 Panel 服务尚不支持电脑控制。请更新并重新启动服务或桌面应用，再刷新状态。",
+          "当前连接的 Drevi 服务尚不支持电脑控制。请更新并重新启动服务或桌面应用，再刷新状态。",
         );
       } else {
         setError(
@@ -131,7 +131,7 @@ export function ComputerUseControls({
               <RefreshCw size={13} className={busy ? "spin" : ""} />
             </button>
           </div>
-          <p>在对话中指定应用、窗口或页面，即可让 Panel 查看和操作。</p>
+          <p>在对话中指定应用、窗口或页面，即可让 Drevi 查看和操作。</p>
           <div className="computer-use-status-row">
             <span>
               {status?.connected ? <Check size={12} /> : <Monitor size={12} />}
@@ -167,7 +167,7 @@ export function ComputerUseControls({
           )}
           {status && !status.available && (
             <div className="computer-use-setup">
-              <p>请在 Panel 项目目录安装官方驱动：</p>
+              <p>请在 Drevi 项目目录安装官方驱动：</p>
               <code>npm run setup:cua</code>
               <p>安装后刷新状态，再连接并完成系统权限授权。</p>
             </div>

@@ -1,3 +1,4 @@
+import { Dreamcatcher } from "./Dreamcatcher";
 import { version as appVersion } from "../package.json";
 import { thinkingDescription } from "../shared/thinking-controls";
 import {
@@ -140,21 +141,10 @@ const CONTINUE_PROMPT =
 function Logo({ small = false }: { small?: boolean }) {
   return (
     <span className={`logo ${small ? "small" : ""}`}>
-      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
-        <rect width="36" height="36" rx="10" fill="var(--logo-background)" />
-        <path
-          d="M11 11v14m0-7h8m0 0v-7m0 7 7 7"
-          stroke="var(--logo-foreground)"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-        <circle cx="11" cy="11" r="2.2" fill="var(--logo-foreground)" />
-        <circle cx="19" cy="11" r="2.2" fill="var(--logo-foreground)" />
-        <circle cx="26" cy="25" r="2.2" fill="var(--logo-foreground)" />
-      </svg>
+      <Dreamcatcher size={34} />
       {!small && (
         <b>
-          panel<span>·</span>
+          Drevi<span className="logo-chinese"> · 梦络</span>
         </b>
       )}
     </span>
@@ -2483,7 +2473,7 @@ export function App() {
                     />
                     <div className="root-guide">
                       <Sparkles size={18} />
-                      <b>让思考从这里生长</b>
+                      <b>让灵感从这里交织</b>
                       <p>
                         每轮对话都会成为画布上的一个节点。你可以随时回来，从这里探索另一个方向。
                       </p>
@@ -3467,7 +3457,7 @@ function Settings({
             默认通过 Exa MCP 搜索，无需搜索密钥。如需使用 Exa API，可在
             <code>.env</code> 中设置 <code>EXA_API_KEY</code>，然后
             {desktop ? (
-              "从 macOS 的 Panel 菜单重启本地服务。"
+              "从 macOS 的 Drevi 菜单重启本地服务。"
             ) : (
               <>
                 重启 <code>npm run dev</code>。
@@ -3575,9 +3565,9 @@ function Help() {
       <div className="modal-illustration">
         <Network size={26} />
       </div>
-      <div className="eyebrow">THINK IN BRANCHES</div>
-      <h2>让思考自由生长</h2>
-      <p className="modal-intro">对话是一张地图，每个节点都是新的出发点。</p>
+      <div className="eyebrow">DREVI · 梦络</div>
+      <h2>捕捉灵感，织出可能。</h2>
+      <p className="modal-intro">Catch ideas. Weave possibilities.</p>
       <div className="help-steps">
         <div>
           <span>01</span>

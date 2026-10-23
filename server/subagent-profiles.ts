@@ -19,22 +19,22 @@ export function profileDiagnostics(
 ): string[] {
   const issues: string[] = [];
   if (!native && agent.runner)
-    issues.push("此角色使用外部 CLI runner；Panel 当前仅支持 Pi 前台子会话。");
+    issues.push("此角色使用外部 CLI runner；Drevi 当前仅支持 Pi 前台子会话。");
   if (!native && agent.machine)
-    issues.push("此角色要求远程 machine，Panel 尚未连接远程子代理运行器。");
+    issues.push("此角色要求远程 machine，Drevi 尚未连接远程子代理运行器。");
   if (!native && agent.defaultAsync)
-    issues.push("此角色要求后台运行，Panel 当前会话不能脱离卡片运行。");
+    issues.push("此角色要求后台运行，Drevi 当前会话不能脱离卡片运行。");
   if (!native && agent.interactive)
-    issues.push("此角色要求交互式终端，Panel 子会话使用无终端模式。");
+    issues.push("此角色要求交互式终端，Drevi 子会话使用无终端模式。");
   if (
     !native &&
     (agent.allowNestedSubagents || agent.tools?.includes("subagent"))
   )
     issues.push(
-      "此角色启用了嵌套委派；Panel 当前只支持由主模型委派，以保持全局并发与审批边界。",
+      "此角色启用了嵌套委派；Drevi 当前只支持由主模型委派，以保持全局并发与审批边界。",
     );
   if (agent.tools?.includes("powershell"))
-    issues.push("powershell 尚未接入 Panel 的命令环境，请使用 bash。");
+    issues.push("powershell 尚未接入 Drevi 的命令环境，请使用 bash。");
   if (!native && agent.mcpDirectTools?.length)
     issues.push("mcpDirectTools 需要插件的后台运行模式。");
   return issues;

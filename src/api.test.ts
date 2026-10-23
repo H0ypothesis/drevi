@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { api } from "./api.ts";
+import { api, readPreference, savePreference } from "./api.ts";
 
 const createPath = "/workspaces/workspace/nodes";
 const regeneratePath = "/workspaces/workspace/nodes/node/regenerate";
@@ -25,7 +25,7 @@ test("older backends cannot silently submit a create or regenerate request with 
       );
       await assert.rejects(api(path, referencedInput), {
         message:
-          "当前后端尚未加载卡片引用功能，请重启 Panel 服务后重试。引用内容尚未发送。",
+          "当前后端尚未加载卡片引用功能，请重启 Drevi 服务后重试。引用内容尚未发送。",
       });
       assert.equal(fetch.mock.callCount(), 1);
       assert.deepEqual(fetch.mock.calls[0].arguments, [
@@ -106,10 +106,30 @@ test("a backend restart is recognized on the next attempt without reloading the 
         ? json(updated ? { cardReferences: true } : {})
         : json({ nodeId: "created-node" }),
   );
-  await assert.rejects(api(createPath, referencedInput), /请重启 Panel 服务/);
+  await assert.rejects(api(createPath, referencedInput), /请重启 Drevi 服务/);
   updated = true;
   assert.deepEqual(await api(createPath, referencedInput), {
     nodeId: "created-node",
   });
   assert.equal(fetch.mock.callCount(), 3);
+});
+
+test("legacy browser preferences survive renaming and new choices take priority", (t) => {
+  const storage = new Map([["panel:theme", "dark"]]);
+  const original = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+  t.after(() => {
+    if (original) Object.defineProperty(globalThis, "localStorage", original);
+    else Reflect.deleteProperty(globalThis, "localStorage");
+  });
+  Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
+    value: {
+      getItem: (key: string) => storage.get(key) ?? null,
+      setItem: (key: string, value: string) => storage.set(key, value),
+    },
+  });
+  assert.equal(readPreference("theme"), "dark");
+  savePreference("theme", "light");
+  assert.equal(readPreference("theme"), "light");
+  assert.equal(storage.get("panel:theme"), "dark");
 });

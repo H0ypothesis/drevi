@@ -1,26 +1,26 @@
 # Computer use with Cua Driver
 
-Panel integrates the unmodified official **Cua Driver 0.30.4** release through
+Drevi integrates the unmodified official **Cua Driver 0.30.4** release through
 MCP. The release was checked on 2026-09-29. Its plain semantic version is stable;
 GitHub marks releases in this monorepo as prereleases to avoid moving the
 repository-wide “Latest” pointer between products. Nightly builds are excluded.
 
 ## Runtime setup
 
-From the `panel` project, run:
+From the `drevi` project, run:
 
 ```sh
 npm run setup:cua
 ```
 
 The setup script downloads a tag-pinned GitHub release asset, checks its exact
-size and SHA256, extracts it under `.panel/cua-driver/0.30.4/`, and verifies the
+size and SHA256, extracts it under `.drevi/cua-driver/0.30.4/`, and verifies the
 official app signature on macOS. It does not run the remote installer, modify
 the shell, install an auto-start service, launch desktop control, or request
 system permissions. The script supports universal macOS and Linux x64/arm64
-assets. Panel's Windows daemon supervision is not implemented yet.
+assets. Drevi's Windows daemon supervision is not implemented yet.
 
-`PANEL_CUA_DRIVER_PATH` may point at an absolute `CuaDriver.app` or executable
+`DREVI_CUA_DRIVER_PATH` may point at an absolute `CuaDriver.app` or executable
 path. On macOS the executable must remain inside the official signed app bundle
 so LaunchServices can preserve its privacy identity. Custom overrides are
 operator-managed; the release manifest verifies only the project-downloaded
@@ -28,12 +28,12 @@ runtime. Re-run setup after changing the pinned version and hashes together in
 `scripts/cua-release.json`.
 
 `desktop:bundle` includes the staged runtime, its release provenance, and its
-license files. If setup has not run, packaging prints a warning and Panel reports
+license files. If setup has not run, packaging prints a warning and Drevi reports
 the runtime as missing. Runtime startup never downloads executable code.
 
 ## Permissions and cursor
 
-Use Panel's explicit permission setup action to request Accessibility and Screen
+Use Drevi's explicit permission setup action to request Accessibility and Screen
 Recording. macOS remains responsible for granting these permissions. macOS Tahoe
 may show a separate direct-capture consent dialog. Merely reading CUA status
 does not start the driver or prompt for permission.
@@ -41,25 +41,25 @@ does not start the driver or prompt for permission.
 The driver daemon runs from its signed app via LaunchServices, with a private
 socket and PID file. Normal startup skips the first-launch permission prompt
 gate; the UI setup route launches the signed permission helper explicitly. The
-public `permissions grant` CLI hardcodes `/Applications/CuaDriver.app`, so Panel
+public `permissions grant` CLI hardcodes `/Applications/CuaDriver.app`, so Drevi
 uses the exact `__permissions-host-request` helper protocol from the pinned
 0.30.4 source for its bundled app. This coupling must be checked when upgrading.
-After a grant, Panel restarts its private driver on the next operation so cached
+After a grant, Drevi restarts its private driver on the next operation so cached
 permission denials do not survive.
 
-Panel cancels and awaits its permission-request subprocess during shutdown.
+Drevi cancels and awaits its permission-request subprocess during shutdown.
 LaunchServices owns the short-lived signed permission helper separately from
 the `open -W` subprocess; an already displayed macOS consent dialog can still
-require user dismissal after Panel closes. Panel does not auto-approve or
+require user dismissal after Drevi closes. Drevi does not auto-approve or
 attempt to manipulate that system dialog.
 
 Cursor overlays are enabled. Each native run starts a distinct driver lifecycle
 session and enables its session cursor. No `--no-overlay` flag is used. Telemetry
-and automatic driver update checks are disabled for Panel-owned processes.
+and automatic driver update checks are disabled for Drevi-owned processes.
 
 ## Tool arguments and approval
 
-Call `computer_use_tools` before using a group. It returns complete **Panel call
+Call `computer_use_tools` before using a group. It returns complete **Drevi call
 schemas**, including the `tool`, `target`, and `arguments` envelope. These are
 the arguments to `computer_use_call`; do not nest that envelope inside
 `arguments` again. For example, first discover windows with:
@@ -79,7 +79,7 @@ Then observe a window ID returned by that discovery:
 ```
 
 The IDs above are illustrative; actual calls must use live discovered IDs.
-Panel supplies driver session and routing fields. Native `pid/window_id` and
+Drevi supplies driver session and routing fields. Native `pid/window_id` and
 browser `target_id/tab_id` must not be copied into `arguments` (the
 `list_windows` PID filter is an exception). Input errors are rejected before
 target acquisition and approval, with the offending parameter and a correction
@@ -157,35 +157,35 @@ selected window/page's content and screenshot to the current model.
 
 ## Lifetimes and concurrency
 
-One Panel host owns one daemon. Native runs have independent MCP transports and
+One Drevi host owns one daemon. Native runs have independent MCP transports and
 driver session labels. Closing a run ends its session, and daemon-side transport
-EOF cleanup is an additional safeguard. A temporary stdin lease stops Panel's
+EOF cleanup is an additional safeguard. A temporary stdin lease stops Drevi's
 private daemon if the host crashes; it is not a persistent background service.
-Panel closes the daemon during orderly server shutdown.
+Drevi closes the daemon during orderly server shutdown.
 
 Driver sessions do not create independent desktops. Cua serializes native input
-delivery internally, but Panel must still hold its own target leases around
+delivery internally, but Drevi must still hold its own target leases around
 multi-step work. The driver client deliberately does not choose lock granularity;
-the Panel computer-use coordinator owns window and browser-page scheduling.
+the Drevi computer-use coordinator owns window and browser-page scheduling.
 Foreground input and shared desktop resources need global coordination even
 when the target windows differ.
 
 Browser target and tab IDs returned by Cua are session-scoped capabilities.
 Titles and URLs cannot establish that two sessions refer to the same physical
-tab. Panel therefore uses a common browser session and central binding registry
+tab. Drevi therefore uses a common browser session and central binding registry
 to coordinate exact page identities. Reconnect changes the session's
 `generation`; all cached bindings and references from an older generation must
 be discarded. Native operations still use per-run sessions.
 
 Cancellation before dispatch does not send a native action. After dispatch,
-Panel waits for the action's result before releasing its scheduling permit;
+Drevi waits for the action's result before releasing its scheduling permit;
 rejecting a local MCP promise alone would not prove the action has stopped. An
 unknown transport outcome or request timeout stops the owned daemon and
 invalidates its MCP connections before settling the request. Actions are never
 replayed automatically. Stopping a run can therefore wait for an in-flight
 operation to finish, up to its timeout.
 
-The daemon runs in Cua's `standard` permission mode. Panel does not pass
+The daemon runs in Cua's `standard` permission mode. Drevi does not pass
 `--grant existing-profile` or enable unrestricted mode. Existing-profile browser
 CDP setup can therefore be refused by the official driver; native window control
 and authorized isolated-browser paths are separate capabilities.
@@ -201,4 +201,4 @@ and authorized isolated-browser paths are separate capabilities.
 
 The community `@amaster.ai/pi-computer-use` extension informed the architecture
 (MCP tool discovery, managed driver lifetime, image preservation, and process
-leases). Panel does not vendor that extension or patch the official driver.
+leases). Drevi does not vendor that extension or patch the official driver.

@@ -23,7 +23,7 @@ import { setupPi } from "./setup-pi.mjs";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const piPackage = join(root, "pi/packages/ai");
 const releasedPackage = dirname(
-  dirname(fileURLToPath(import.meta.resolve("@panel/pi-model-data"))),
+  dirname(fileURLToPath(import.meta.resolve("@drevi/pi-model-data"))),
 );
 const release = JSON.parse(
   readFileSync(join(releasedPackage, "package.json"), "utf8"),
@@ -39,7 +39,7 @@ function snapshot(directory) {
 }
 
 function fixture(t) {
-  const directory = mkdtempSync(join(tmpdir(), "panel-setup-pi-"));
+  const directory = mkdtempSync(join(tmpdir(), "drevi-setup-pi-"));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const sourcePackage = join(directory, "source");
   const releasePackage = join(directory, "release");
@@ -100,7 +100,7 @@ function fixture(t) {
       );
       assert.equal(
         readdirSync(providers).some((name) =>
-          name.startsWith(".panel-model-data-"),
+          name.startsWith(".drevi-model-data-"),
         ),
         false,
       );
@@ -113,13 +113,13 @@ test("the pinned npm model-data release matches the Pi source version", () => {
   const source = JSON.parse(
     readFileSync(join(piPackage, "package.json"), "utf8"),
   );
-  const panel = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+  const drevi = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
   assert.equal(release.version, source.version);
   assert.equal(
-    panel.devDependencies["@panel/pi-model-data"],
+    drevi.devDependencies["@drevi/pi-model-data"],
     `npm:@earendil-works/pi-ai@${source.version}`,
   );
-  assert.equal(panel.scripts["setup:pi"], "node scripts/setup-pi.mjs");
+  assert.equal(drevi.scripts["setup:pi"], "node scripts/setup-pi.mjs");
 });
 
 test("setup installs and validates released model metadata offline, then repeats safely", (t) => {
@@ -212,7 +212,7 @@ for (const [scenario, corrupt, expected] of [
     assert.deepEqual(snapshot(isolated.data), before);
     assert.equal(
       readdirSync(isolated.providers).some((name) =>
-        name.startsWith(".panel-model-data-"),
+        name.startsWith(".drevi-model-data-"),
       ),
       false,
     );

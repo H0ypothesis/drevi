@@ -65,7 +65,7 @@ export async function probeThinking(
               body.thinking = {
                 type:
                   option === "invalid-toggle"
-                    ? "panel_invalid_probe_value"
+                    ? "drevi_invalid_probe_value"
                     : option,
               };
             else if (option !== "baseline")
@@ -74,7 +74,7 @@ export async function probeThinking(
                 format,
                 model.api,
                 option === "invalid-effort"
-                  ? "panel_invalid_probe_value"
+                  ? "drevi_invalid_probe_value"
                   : option,
               );
             return body;

@@ -43,7 +43,7 @@ process.on(
       if (process.platform !== "darwin" && process.platform !== "linux")
         throw new SandboxSetupError(
           "unsupported",
-          "当前系统尚未接入 Panel 沙盒，命令未执行。",
+          "当前系统尚未接入 Drevi 沙盒，命令未执行。",
         );
       if (process.platform === "darwin") {
         try {

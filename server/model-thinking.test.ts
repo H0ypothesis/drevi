@@ -11,7 +11,7 @@ import {
 } from "../shared/provider-settings.ts";
 
 async function setup(t: TestContext) {
-  const directory = await mkdtemp(join(tmpdir(), "panel-thinking-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-thinking-"));
   t.after(() => rm(directory, { force: true, recursive: true }));
   const settings = new ModelProviderSettings(directory);
   await settings.init();

@@ -20,7 +20,7 @@ const searchOptions = {
 const url = Type.String({ minLength: 1, maxLength: 8192 });
 const object = { additionalProperties: false };
 
-/** Native research parameters, restricted to Panel's existing public-web provider. */
+/** Native research parameters, restricted to Drevi's existing public-web provider. */
 export const nativeWebSchemas = {
   web_search: Type.Object(
     {

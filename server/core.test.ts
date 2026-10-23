@@ -85,7 +85,7 @@ async function until(check: () => boolean) {
 }
 
 async function setup() {
-  const directory = await mkdtemp(join(tmpdir(), "panel-test-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-test-"));
   const store = new Store(directory);
   await store.init(false);
   const workspace = createWorkspace("Root Topic", "Root Background");
@@ -265,7 +265,7 @@ test("persistence retains concurrent results and restarts never re-run unfinishe
 });
 
 test("corrupt storage is reported instead of silently replacing user data", async () => {
-  const directory = await mkdtemp(join(tmpdir(), "panel-corrupt-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-corrupt-"));
   try {
     await writeFile(join(directory, "state.json"), "{bad-data");
     await assert.rejects(new Store(directory).init());

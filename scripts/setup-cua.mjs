@@ -58,7 +58,7 @@ export async function setupCua({
 } = {}) {
   const target = runtimeTarget(platform, arch);
   const asset = release.assets[target];
-  const base = join(projectRoot, ".panel", "cua-driver", release.version);
+  const base = join(projectRoot, ".drevi", "cua-driver", release.version);
   const destination = join(base, target);
   try {
     const installed = JSON.parse(

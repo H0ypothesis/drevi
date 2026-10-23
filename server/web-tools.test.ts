@@ -152,7 +152,7 @@ test("source metadata filters unsafe links and preserves complete valid URLs", a
 });
 
 for (const name of ["web_search", "fetch_content"])
-  test(`${name} preserves full plugin output and sources without Panel truncation`, async () => {
+  test(`${name} preserves full plugin output and sources without Drevi truncation`, async () => {
     const body = `BEGIN_RESULT\n${"完整内容🙂".repeat(15_000)}\nEND_RESULT`;
     const { tool } = fixture({
       text: body,

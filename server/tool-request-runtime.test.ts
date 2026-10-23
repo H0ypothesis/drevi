@@ -33,7 +33,7 @@ function projectedRecords(messages: Message[]) {
       message.content.some(
         (part) =>
           part.type === "text" &&
-          part.text.startsWith("Panel 按对应用户消息通过 @"),
+          part.text.startsWith("Drevi 按对应用户消息通过 @"),
       ),
   );
   assert.equal(
@@ -51,7 +51,7 @@ function projectedRecords(messages: Message[]) {
   assert.match(text, /不可信资料/);
   const records = content.flatMap((part) => {
     if (part.type !== "text") return [];
-    const match = part.text.match(/^Panel 工具调用 \d+\/\d+: (\{.*\})$/);
+    const match = part.text.match(/^Drevi 工具调用 \d+\/\d+: (\{.*\})$/);
     return match
       ? [
           JSON.parse(match[1]) as {
@@ -67,7 +67,7 @@ function projectedRecords(messages: Message[]) {
       (message) =>
         message.role === "assistant" &&
         message.diagnostics?.some(
-          (diagnostic) => diagnostic.type === "panel_tool_request_bootstrap",
+          (diagnostic) => diagnostic.type === "drevi_tool_request_bootstrap",
         ),
     ),
     false,
@@ -290,7 +290,7 @@ test("@web_search performs an approved real search before the first provider res
   assert.ok(assistant && assistant.role === "assistant");
   assert.equal(
     assistant.diagnostics?.some(
-      (diagnostic) => diagnostic.type === "panel_tool_request_bootstrap",
+      (diagnostic) => diagnostic.type === "drevi_tool_request_bootstrap",
     ),
     true,
   );

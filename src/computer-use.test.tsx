@@ -65,7 +65,7 @@ test("computer target waits identify their scope and preserve ordinary file wait
   assert.equal(toolWaitLabel({ ...waiting, name: "bash" }), "等待文件操作");
 });
 
-test("tool screenshots only load Panel's revision-specific image endpoint", () => {
+test("tool screenshots only load Drevi's revision-specific image endpoint", () => {
   assert.equal(toolImageUrl(imageUrl), imageUrl);
   for (const url of [
     "https://remote.example/image.png",

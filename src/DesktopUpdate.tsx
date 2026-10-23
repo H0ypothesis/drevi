@@ -17,7 +17,7 @@ export function DesktopUpdate() {
         setState(event.detail);
       }
     };
-    window.addEventListener("panel:update-state", receive);
+    window.addEventListener("drevi:update-state", receive);
     desktop
       .getUpdateState()
       .then((value) => {
@@ -26,7 +26,7 @@ export function DesktopUpdate() {
       .catch(() => {});
     return () => {
       live = false;
-      window.removeEventListener("panel:update-state", receive);
+      window.removeEventListener("drevi:update-state", receive);
     };
   }, [desktop]);
   useEffect(() => {

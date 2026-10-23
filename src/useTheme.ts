@@ -42,10 +42,10 @@ export function useTheme() {
 
   useEffect(() => {
     const sync = (event: StorageEvent) => {
-      if (event.key === "panel:theme" || event.key === null) {
+      if (event.key === "drevi:theme" || event.key === null) {
         setPreference(readThemePreference());
       }
-      if (event.key === "panel:palette" || event.key === null) {
+      if (event.key === "drevi:palette" || event.key === null) {
         setPalette(readPalettePreference());
       }
     };

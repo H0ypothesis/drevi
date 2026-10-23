@@ -1,6 +1,6 @@
 {
-  "name": "panel-agent-workbench",
-  "version": "0.9.8",
+  "name": "drevi-agent-workbench",
+  "version": "0.9.9",
   "private": true,
   "type": "module",
   "scripts": {
@@ -46,7 +46,7 @@
     }
   },
   "devDependencies": {
-    "@panel/pi-model-data": "npm:@earendil-works/pi-ai@0.99.1",
+    "@drevi/pi-model-data": "npm:@earendil-works/pi-ai@0.99.1",
     "@types/node": "22.19.19",
     "@types/react": "19.1.16",
     "@types/react-dom": "19.1.9",

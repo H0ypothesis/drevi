@@ -22,7 +22,7 @@ import { fauxAssistantMessage } from "@earendil-works/pi-ai";
 
 async function fixture(t: TestContext) {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-generated-files-")),
+    await mkdtemp(join(tmpdir(), "drevi-generated-files-")),
   );
   t.after(() => rm(directory, { recursive: true, force: true }));
   const project = join(directory, "project");

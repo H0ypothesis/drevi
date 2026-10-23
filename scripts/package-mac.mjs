@@ -9,8 +9,8 @@ import { extractArchive, validateApp } from "../desktop/macos/updater.mjs";
 const run = promisify(execFile);
 
 export async function packageMacApp(app, archive, version) {
-  if (basename(app) !== "Panel.app")
-    throw new Error("The update archive must contain Panel.app.");
+  if (basename(app) !== "Drevi.app")
+    throw new Error("The update archive must contain Drevi.app.");
   // ditto wraps its 16-bit entry count instead of producing ZIP64. Resource
   // forks doubled our entry count and made older updaters stop halfway through.
   let entries = 1;
@@ -26,7 +26,7 @@ export async function packageMacApp(app, archive, version) {
     }
   }
   await mkdir(dirname(archive), { recursive: true });
-  const stage = await mkdtemp(join(dirname(archive), ".panel-package-"));
+  const stage = await mkdtemp(join(dirname(archive), ".drevi-package-"));
   try {
     const prepared = join(stage, basename(archive));
     await run(
@@ -72,7 +72,7 @@ if (
 ) {
   if (process.argv.length !== 5)
     throw new Error(
-      "Usage: node scripts/package-mac.mjs <Panel.app> <archive.zip> <version>",
+      "Usage: node scripts/package-mac.mjs <Drevi.app> <archive.zip> <version>",
     );
   await packageMacApp(
     resolve(process.argv[2]),

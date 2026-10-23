@@ -46,7 +46,7 @@ async function until(check: () => boolean) {
 
 async function setup(t: TestContext, concurrency = 2) {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-workspace-deletion-")),
+    await mkdtemp(join(tmpdir(), "drevi-workspace-deletion-")),
   );
   const dataDirectory = join(directory, "data");
   const store = new Store(dataDirectory);

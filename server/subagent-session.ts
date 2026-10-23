@@ -26,7 +26,7 @@ import {
 } from "./subagent-handoff.ts";
 
 /** All native and extension tools cross the same approval/audit boundary. */
-export async function createPanelChildSession(
+export async function createDreviChildSession(
   launch: ChildSessionLaunch,
   options: {
     id: string;
@@ -53,7 +53,7 @@ export async function createPanelChildSession(
     throw new Error("使用原生子代理前，请先为当前探索设置工作目录。");
   if (launch.tools?.includes("powershell"))
     throw new Error(
-      "Panel 尚未接入 powershell 的命令环境，请在角色中使用 bash。",
+      "Drevi 尚未接入 powershell 的命令环境，请在角色中使用 bash。",
     );
   const root = await realpath(launch.cwd);
   const skillRoots = new Set(

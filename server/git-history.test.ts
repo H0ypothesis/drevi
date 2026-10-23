@@ -20,7 +20,7 @@ import type {
   RunConfig,
   ToolCall,
 } from "../shared/types.ts";
-import { createPanelTools } from "./coding-tools.ts";
+import { createDreviTools } from "./coding-tools.ts";
 import type { RunEnvironment, Runtime } from "./runtime.ts";
 import { Scheduler } from "./scheduler.ts";
 import { createWorkspace } from "./seed.ts";
@@ -64,7 +64,7 @@ function nodeCommand(script: string) {
 
 async function fixture(t: TestContext, approvalMode: "ask" | "auto" = "auto") {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-git-history-integration-")),
+    await mkdtemp(join(tmpdir(), "drevi-git-history-integration-")),
   );
   const project = join(directory, "project");
   const stateDirectory = join(directory, "state");
@@ -94,7 +94,7 @@ async function fixture(t: TestContext, approvalMode: "ask" | "auto" = "auto") {
     },
   };
   const scheduler = new Scheduler(store, runtime);
-  const tools = createPanelTools(project);
+  const tools = createDreviTools(project);
   t.after(async () => {
     scheduler.shutdown();
     for (const run of runs) run.finish();

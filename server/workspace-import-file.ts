@@ -46,7 +46,7 @@ export async function readWorkspaceImportFile(
           .replace(/^\uFEFF/, ""),
       );
     } catch {
-      throw new Error("文件不是有效的 JSON，请选择 Panel 导出的 JSON 文件。");
+      throw new Error("文件不是有效的 JSON，请选择 Drevi 导出的 JSON 文件。");
     }
   } finally {
     await file.close();

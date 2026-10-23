@@ -22,7 +22,7 @@ import { MAX_IMPORT_BYTES } from "./workspace-import.ts";
 import { readWorkspaceImportFile } from "./workspace-import-file.ts";
 
 async function setup(t: TestContext) {
-  const directory = await mkdtemp(join(tmpdir(), "panel-import-api-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-import-api-"));
   const dataDirectory = join(directory, "data");
   const store = new Store(dataDirectory);
   await store.init(false);

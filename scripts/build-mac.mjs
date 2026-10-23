@@ -12,9 +12,9 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const appVersion = JSON.parse(
   await readFile(join(root, "package.json"), "utf8"),
 ).version;
-const node = resolve(process.env.PANEL_NODE_BINARY || process.execPath);
+const node = resolve(process.env.DREVI_NODE_BINARY || process.execPath);
 const nodeLicense =
-  process.env.PANEL_NODE_LICENSE || resolve(dirname(node), "../LICENSE");
+  process.env.DREVI_NODE_LICENSE || resolve(dirname(node), "../LICENSE");
 const run = (command, args) =>
   execFileSync(command, args, { cwd: root, stdio: "inherit" });
 const capture = (command, args) =>
@@ -46,11 +46,11 @@ if (
   )
 ) {
   throw new Error(
-    "This Node binary depends on external libraries (for example Homebrew). Set PANEL_NODE_BINARY to the bin/node from the official macOS archive at https://nodejs.org/en/download. The app must not depend on this machine's Homebrew installation.",
+    "This Node binary depends on external libraries (for example Homebrew). Set DREVI_NODE_BINARY to the bin/node from the official macOS archive at https://nodejs.org/en/download. The app must not depend on this machine's Homebrew installation.",
   );
 }
 
-const app = join(root, "release/Panel.app");
+const app = join(root, "release/Drevi.app");
 await rm(app, { recursive: true, force: true });
 const contents = join(app, "Contents");
 const resources = join(contents, "Resources");
@@ -85,11 +85,11 @@ run("xcrun", [
   `${architecture === "arm64" ? "arm64" : "x86_64"}-apple-macosx${minimumOS}`,
   "-module-cache-path",
   join(root, "build/swift-cache"),
-  "desktop/macos/Panel.swift",
+  "desktop/macos/Drevi.swift",
   "desktop/macos/Updater.swift",
   "desktop/macos/CuaPreview.swift",
   "-o",
-  join(contents, "MacOS/Panel"),
+  join(contents, "MacOS/Drevi"),
   "-framework",
   "AppKit",
   "-framework",
@@ -102,14 +102,14 @@ run("xcrun", [
   "-module-cache-path",
   join(root, "build/swift-cache"),
   "desktop/macos/Icon.swift",
-  join(root, "build/Panel.iconset"),
+  join(root, "build/Drevi.iconset"),
 ]);
 run("iconutil", [
   "-c",
   "icns",
-  join(root, "build/Panel.iconset"),
+  join(root, "build/Drevi.iconset"),
   "-o",
-  join(resources, "Panel.icns"),
+  join(resources, "Drevi.icns"),
 ]);
 // Ad-hoc signing is for local use. Developer ID/notarization is a release step.
 run("codesign", [
@@ -120,13 +120,15 @@ run("codesign", [
 ]);
 run("codesign", ["--force", "--sign", "-", app]);
 run("codesign", ["--verify", "--deep", "--strict", app]);
-const archive = join(root, `release/Panel-mac-${architecture}.zip`);
+const archive = join(root, `release/Drevi-mac-${architecture}.zip`);
 await packageMacApp(app, archive, appVersion);
 await writeFile(
   join(root, "release/build-info.json"),
   JSON.stringify(
     {
       version: appVersion,
+      name: "Drevi · 梦络",
+      sourceCommit: capture("git", ["rev-parse", "HEAD"]),
       architecture,
       node: version,
       minimumOS,

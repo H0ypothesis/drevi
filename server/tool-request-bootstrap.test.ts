@@ -88,7 +88,7 @@ test("bootstrap has real selected-model metadata, zero billed usage, and explici
   );
   assert.ok(
     result.content.every(
-      (part) => part.type === "toolCall" && part.id.startsWith("panel-intent-"),
+      (part) => part.type === "toolCall" && part.id.startsWith("drevi-intent-"),
     ),
   );
 });
@@ -278,7 +278,7 @@ test("only exact marked host batches are projected, never ordinary provider tool
       ...bootstrap,
       diagnostics: [
         {
-          type: "panel_tool_request_bootstrap",
+          type: "drevi_tool_request_bootstrap",
           timestamp: 1,
           details: { source: "other" },
         },

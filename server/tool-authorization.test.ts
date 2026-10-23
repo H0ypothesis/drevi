@@ -15,7 +15,7 @@ function fixture() {
     settingsVersion: 3,
     approvalMode: "auto",
     safetyModel: "provider/safety-model",
-    sandboxPolicyVersion: "panel-sandbox-v1",
+    sandboxPolicyVersion: "drevi-sandbox-v1",
   };
   const call: ToolAuthorizationCall = {
     id: "call-1",
@@ -82,7 +82,7 @@ const changedScopes: Partial<ToolAuthorizationScope>[] = [
   { approvalMode: "ask" },
   { safetyModel: "provider/other-safety-model" },
   { safetyModel: undefined },
-  { sandboxPolicyVersion: "panel-sandbox-v2" },
+  { sandboxPolicyVersion: "drevi-sandbox-v2" },
   { sandboxPolicyVersion: undefined },
 ];
 for (const change of changedScopes) {

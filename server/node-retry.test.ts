@@ -17,7 +17,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import type { Message } from "@earendil-works/pi-ai";
 import type { ModelOption, RunConfig } from "../shared/types.ts";
 import { createApi } from "./api.ts";
-import { createPanelTools } from "./coding-tools.ts";
+import { createDreviTools } from "./coding-tools.ts";
 import type { RunEnvironment, Runtime } from "./runtime.ts";
 import { Scheduler } from "./scheduler.ts";
 import { createWorkspace } from "./seed.ts";
@@ -45,7 +45,7 @@ async function until(check: () => boolean) {
 
 async function fixture(t: TestContext) {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-node-retry-")),
+    await mkdtemp(join(tmpdir(), "drevi-node-retry-")),
   );
   const project = join(directory, "project");
   const data = join(directory, "data");
@@ -105,7 +105,7 @@ async function fixture(t: TestContext) {
     const id = randomUUID();
     const input = { id, name, arguments: args };
     assert.equal(await run.environment.beforeToolCall(input), true);
-    const tool = createPanelTools(run.environment.workingDirectory!).find(
+    const tool = createDreviTools(run.environment.workingDirectory!).find(
       (item) => item.name === name,
     )!;
     try {

@@ -9,6 +9,7 @@ import {
   readFile,
   readlink,
   realpath,
+  rename,
   rm,
   symlink,
   writeFile,
@@ -24,7 +25,7 @@ const exec = promisify(execFile);
 
 async function fixture(t: TestContext) {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-git-restore-")),
+    await mkdtemp(join(tmpdir(), "drevi-git-restore-")),
   );
   t.after(() => rm(directory, { force: true, recursive: true }));
   const cwd = join(directory, "project");
@@ -308,7 +309,7 @@ test("legacy snapshots restore Git mode while retaining current non-executable p
   await chmod(join(cwd, "file"), 0o640);
   await update(() => writeFile(join(cwd, "file"), "changed"));
   const baseline = await snapshots.prepare("workspace", cwd);
-  await rm(join(baseline.repository, "panel-permissions"), { recursive: true });
+  await rm(join(baseline.repository, "drevi-permissions"), { recursive: true });
   await snapshots.applyRestore(
     await snapshots.prepareRestore("workspace", cwd, entries),
   );
@@ -323,15 +324,35 @@ test("replay discards an interrupted plan's partial staging file without leaving
   const plan = await snapshots.prepareRestore("workspace", cwd, entries);
   const staging = join(
     cwd,
-    `.panel-restore-${plan.id}-${createHash("sha256").update("file").digest("hex").slice(0, 16)}`,
+    `.drevi-restore-${plan.id}-${createHash("sha256").update("file").digest("hex").slice(0, 16)}`,
   );
   await writeFile(staging, "interrupted partial content");
-  await writeFile(join(cwd, ".panel-restore-unrelated"), "keep");
+  await writeFile(join(cwd, ".drevi-restore-unrelated"), "keep");
   await new GitSnapshots(data).applyRestore(JSON.parse(JSON.stringify(plan)));
   assert.equal(await readFile(join(cwd, "file"), "utf8"), "original");
   await assert.rejects(lstat(staging), { code: "ENOENT" });
   assert.equal(
-    await readFile(join(cwd, ".panel-restore-unrelated"), "utf8"),
+    await readFile(join(cwd, ".drevi-restore-unrelated"), "utf8"),
     "keep",
   );
+});
+
+test("Drevi restores original permissions from Panel snapshot metadata", async (t) => {
+  const { cwd, snapshots, entries, update } = await fixture(t);
+  await writeFile(join(cwd, "script"), "original");
+  await chmod(join(cwd, "script"), 0o750);
+  await update(async () => {
+    await writeFile(join(cwd, "script"), "changed");
+    await chmod(join(cwd, "script"), 0o600);
+  });
+  const baseline = await snapshots.prepare("workspace", cwd);
+  await rename(
+    join(baseline.repository, "drevi-permissions"),
+    join(baseline.repository, "panel-permissions"),
+  );
+  await snapshots.applyRestore(
+    await snapshots.prepareRestore("workspace", cwd, entries),
+  );
+  assert.equal(await readFile(join(cwd, "script"), "utf8"), "original");
+  assert.equal((await lstat(join(cwd, "script"))).mode & 0o777, 0o750);
 });

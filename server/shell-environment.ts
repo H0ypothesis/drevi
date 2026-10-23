@@ -1,8 +1,8 @@
 // Preserve the host's installed toolchain, user paths and locale without passing
-// Panel's model-provider credentials or arbitrary service settings to commands.
+// Drevi's model-provider credentials or arbitrary service settings to commands.
 // This only controls inherited environment variables; HOME/PATH and filesystem
 // access still belong to the host user, so it is not an operating-system sandbox.
-export const SHELL_ENVIRONMENT_POLICY_VERSION = "panel-shell-env-v1";
+export const SHELL_ENVIRONMENT_POLICY_VERSION = "drevi-shell-env-v1";
 
 const DEVELOPMENT_ENVIRONMENT_KEYS = [
   "PATH",

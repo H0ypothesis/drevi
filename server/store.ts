@@ -362,7 +362,7 @@ export class Store extends EventEmitter {
       }
       const result = await this.gitSnapshots.capture(
         baseline,
-        `Panel ${entry.toolName}: ${entry.nodeId} (revision ${entry.nodeRevision}, tool ${entry.toolCallId})`,
+        `Drevi ${entry.toolName}: ${entry.nodeId} (revision ${entry.nodeRevision}, tool ${entry.toolCallId})`,
       );
       if (!result) {
         if (call) call.fileSnapshot = "unchanged";

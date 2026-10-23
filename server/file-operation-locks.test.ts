@@ -13,7 +13,7 @@ import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import test, { type TestContext } from "node:test";
 import { pathToFileURL } from "node:url";
-import { createPanelTools } from "./coding-tools.ts";
+import { createDreviTools } from "./coding-tools.ts";
 import {
   FileOperationLocks,
   resolveFileOperationResource,
@@ -23,7 +23,7 @@ import {
 } from "./file-operation-locks.ts";
 
 async function fixture(t: TestContext) {
-  const directory = await mkdtemp(join(tmpdir(), "panel-file-locks-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-file-locks-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const cwd = join(directory, "work");
   await mkdir(cwd);
@@ -169,11 +169,11 @@ test("Pi file URLs and home-directory notation resolve to the actual tool paths"
   });
   assert.equal(fromHome?.canonicalPath, home);
   const inHome = await resolveFileOperationResource(homedir(), "read", {
-    path: "~/panel-lock-path-resolution-example",
+    path: "~/drevi-lock-path-resolution-example",
   });
   assert.equal(
     inHome?.canonicalPath,
-    join(home, "panel-lock-path-resolution-example"),
+    join(home, "drevi-lock-path-resolution-example"),
   );
   await assert.rejects(
     resolveFileOperationResource(cwd, "write", {
@@ -190,7 +190,7 @@ test("Pi file URLs and home-directory notation resolve to the actual tool paths"
 test("Pi @ and Unicode-space paths lock and snapshot the actual written file", async (t) => {
   const { cwd, root } = await fixture(t);
   const locks = new FileOperationLocks();
-  const tools = createPanelTools(cwd);
+  const tools = createDreviTools(cwd);
   const write = tools.find((tool) => tool.name === "write")!;
   for (const path of [
     "@foo.ts",
@@ -220,7 +220,7 @@ test("Pi @ and Unicode-space paths lock and snapshot the actual written file", a
 
 test("read variants use the same curly-quote, AM/PM-space and NFD file as Pi", async (t) => {
   const { cwd } = await fixture(t);
-  const read = createPanelTools(cwd).find((tool) => tool.name === "read")!;
+  const read = createDreviTools(cwd).find((tool) => tool.name === "read")!;
   const variants = [
     ["it's.txt", "it\u2019s.txt"],
     ["shot 10 AM.png.txt", "shot 10\u202fAM.png.txt"],
@@ -250,7 +250,7 @@ test("read variants are generated after internal symlink canonicalization", asyn
     path: "alias/file.txt",
   });
   assert.equal(resource?.canonicalPath, await realpath(actual));
-  const read = createPanelTools(cwd).find((tool) => tool.name === "read")!;
+  const read = createDreviTools(cwd).find((tool) => tool.name === "read")!;
   const result = await read.execute("canonical-fallback", {
     path: "alias/file.txt",
   });

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { createPanelTools } from "./coding-tools.ts";
+import { createDreviTools } from "./coding-tools.ts";
 import type { RunEnvironment } from "./runtime.ts";
 import type { SandboxNetworkRequest } from "./sandbox-policy.ts";
 import { checkSandbox, type SandboxCheck } from "./sandbox.ts";
@@ -53,7 +53,7 @@ export function createRunCodingTools(
     permissions.set(environment, grants);
   }
   const allowed = grants;
-  return createPanelTools(
+  return createDreviTools(
     cwd,
     async (request: SandboxNetworkRequest, signal) => {
       signal?.throwIfAborted();

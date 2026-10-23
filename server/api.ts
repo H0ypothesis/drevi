@@ -922,7 +922,7 @@ export function createApi(
                 .join("\n---\n\n");
             response.writeHead(200, {
               "Content-Type": "text/markdown; charset=utf-8",
-              "Content-Disposition": 'attachment; filename="panel-path.md"',
+              "Content-Disposition": 'attachment; filename="drevi-path.md"',
             });
             response.end(markdown);
           } else {
@@ -935,7 +935,7 @@ export function createApi(
             const exportId = workspace.id.replace(/[^a-zA-Z0-9_-]/g, "_");
             response.setHeader(
               "Content-Disposition",
-              `attachment; filename="panel-exploration_${exportId}_${exportDate}.json"`,
+              `attachment; filename="drevi-exploration_${exportId}_${exportDate}.json"`,
             );
             json(response, 200, {
               version: 1,

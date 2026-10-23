@@ -1,5 +1,5 @@
 // Pinned upstream internals. Keep discovery, profile semantics and child hooks
-// together so Panel does not implement a competing agent configuration format.
+// together so Drevi does not implement a competing agent configuration format.
 export { runSync } from "../node_modules/pi-subagents/src/runs/foreground/execution.js";
 export {
   discoverAgents,

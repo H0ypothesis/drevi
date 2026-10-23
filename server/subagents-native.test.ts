@@ -22,10 +22,10 @@ import {
 import { Subagents } from "./subagents.ts";
 import { subagentCatalog } from "./subagent-profiles.ts";
 import {
-  createPanelChildSession,
+  createDreviChildSession,
   persistSubagentOutput,
 } from "./subagent-session.ts";
-import { createPanelTools } from "./coding-tools.ts";
+import { createDreviTools } from "./coding-tools.ts";
 import type { SubagentRun } from "../shared/types.ts";
 
 async function fixture(
@@ -34,7 +34,7 @@ async function fixture(
   allowed = true,
 ) {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-native-agents-")),
+    await mkdtemp(join(tmpdir(), "drevi-native-agents-")),
   );
   const cwd = join(directory, "project");
   const user = join(directory, "user");
@@ -64,7 +64,7 @@ async function fixture(
       throw new Error("Unexpected output persistence in this test");
     },
     createChildSession: (id, launch, skillPaths) =>
-      createPanelChildSession(launch, {
+      createDreviChildSession(launch, {
         id,
         skillPaths,
         providers: {
@@ -72,7 +72,7 @@ async function fixture(
           getRegisteredProviderConfig: () => undefined,
           getRegisteredNativeProvider: () => registry.getProvider("openai"),
         },
-        tools: createPanelTools(cwd),
+        tools: createDreviTools(cwd),
         onDispose: async () => {
           disposed++;
         },
@@ -231,7 +231,7 @@ test("a missing required tool fails before model execution instead of silently n
 });
 
 for (const allowed of [false, true])
-  test(`native extension tools cross Panel approval (allowed=${allowed})`, async (t) => {
+  test(`native extension tools cross Drevi approval (allowed=${allowed})`, async (t) => {
     const env = await fixture(
       t,
       (context) =>
@@ -283,7 +283,7 @@ test("native navigation tools cannot follow a directory symlink outside the work
   assert.equal(env.approvals[0].name, "ls");
 });
 
-test("native permission rules block tools before Panel execution", async (t) => {
+test("native permission rules block tools before Drevi execution", async (t) => {
   const env = await fixture(t, (context) => {
     const result = context.messages.find((item) => item.role === "toolResult");
     if (result) {
@@ -304,7 +304,7 @@ test("native permission rules block tools before Panel execution", async (t) => 
   assert.equal(env.executed.length, 0);
 });
 
-test("unsupported nested runners are visible and cannot bypass Panel's queue", async (t) => {
+test("unsupported nested runners are visible and cannot bypass Drevi's queue", async (t) => {
   let called = false;
   const env = await fixture(t, () => {
     called = true;
@@ -355,7 +355,7 @@ test("selected global skills can be read through their own audited approval with
 });
 
 test("automatic output persistence cannot write after approval denial", async (t) => {
-  const directory = await mkdtemp(join(tmpdir(), "panel-output-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-output-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   let executed = false;
   await assert.rejects(

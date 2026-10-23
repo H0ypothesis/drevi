@@ -1,21 +1,22 @@
 <p align="center">
-  <img src="public/favicon.svg" width="64" height="64" alt="Panel 标志">
+  <img src="public/favicon.svg" width="64" height="64" alt="Drevi 标志">
 </p>
 
-<h1 align="center">Panel</h1>
+<h1 align="center">Drevi · 梦络</h1>
 
-<p align="center"><strong>让思考自由生长。</strong></p>
+<p align="center"><strong>Catch ideas. Weave possibilities.</strong></p>
+<p align="center">捕捉灵感，织出可能。</p>
 <p align="center">基于 Pi 的非线性 Agent 工作台，把对话变成一张可以分支、比较与融合的图。</p>
 
 <!-- 发布新版时同步更新安装包链接。 -->
 <p align="center">
-  <a href="https://github.com/H0ypothesis/panel/releases/download/v0.9.8/Panel-mac-arm64.zip">
-    <img src="docs/assets/download-macos.svg" width="304" height="80" alt="一键下载 Panel v0.9.8 · Apple Silicon · macOS 13.5 及以上">
+  <a href="https://github.com/H0ypothesis/drevi/releases/download/v0.9.9/Drevi-mac-arm64.zip">
+    <img src="docs/assets/download-macos.svg" width="304" height="80" alt="一键下载 Drevi v0.9.9 · Apple Silicon · macOS 13.5 及以上">
   </a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/H0ypothesis/panel/releases">所有版本</a> ·
+  <a href="https://github.com/H0ypothesis/drevi/releases">所有版本</a> ·
   <a href="docs/USAGE.md">使用指南</a> ·
   <a href="docs/CONFIGURATION.md">模型配置</a> ·
   <a href="#从源码运行">从源码运行</a>
@@ -26,12 +27,12 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/workbench-dark.png">
   <source media="(prefers-color-scheme: light)" srcset="docs/assets/workbench.png">
-  <img src="docs/assets/workbench.png" alt="Panel 工作台：左侧探索列表、中间分支画布与全局缩略图、右侧对话阅读和分支输入区">
+  <img src="docs/assets/workbench.png" alt="Drevi 工作台：左侧探索列表、中间分支画布与全局缩略图、右侧对话阅读和分支输入区">
 </picture>
 
 <p align="center">当前版本实拍 · Pi Demo 示例探索 · <a href="docs/assets/workbench.png">浅色预览</a> / <a href="docs/assets/workbench-dark.png">深色预览</a></p>
 
-## 用 Panel 做什么
+## 用 Drevi 做什么
 
 | 能力               | 使用方式                                                                  |
 | ------------------ | ------------------------------------------------------------------------- |
@@ -47,16 +48,18 @@
 
 ## 下载与开始使用
 
-1. 点击顶部下载按钮，解压 `Panel-mac-arm64.zip`，将 `Panel.app` 放入「应用程序」后打开。App 内置运行环境，无需另装 Node.js。
+1. 点击顶部下载按钮，解压 `Drevi-mac-arm64.zip`，将 `Drevi.app` 放入「应用程序」后打开。App 内置运行环境，无需另装 Node.js。
 2. 先用 **Pi Demo** 体验分支流程，无需 API Key。演示内容为预设回复，不调用真实模型或执行工具。
 3. 使用真实模型时，打开左下角 **「模型连接」→「未配置」**，填写 **API URL、API Key、Model** 并保存，配置立即生效。
 4. 新建探索，写下主题与背景；点击卡片右侧的 **`+`** 开始提问，或选中历史节点继续分支。
 
-当前公开下载版本为 **v0.9.8**，安装包面向 **Apple Silicon（arm64），macOS 13.5 及以上**。这是采用本地 ad-hoc 签名的预览版，尚未完成 Apple 公证；Intel 版本暂未提供下载。安装与快捷键说明见 [macOS 客户端文档](docs/MACOS.md)。
+当前公开下载版本为 **v0.9.9**，安装包面向 **Apple Silicon（arm64），macOS 13.5 及以上**。这是采用本地 ad-hoc 签名的预览版，尚未完成 Apple 公证；Intel 版本暂未提供下载。安装与快捷键说明见 [macOS 客户端文档](docs/MACOS.md)。
 
 按住顶部空白区域可拖动窗口，双击可放大到可用桌面区域，再次双击恢复原尺寸。模型配置也可通过 `⌘,` 打开。
 
-**v0.5 起支持 App 内更新**：每天自动检查 GitHub Release，发现新版后在左下角版本号旁显示「有更新」。点击即可下载、校验、替换并重启，探索和 API 配置会保留；有运行任务时需先等待完成。也可使用「Panel → 检查更新…」手动检查。
+**v0.5 起支持 App 内更新**：每天自动检查 GitHub Release，发现新版后在左下角版本号旁显示「有更新」。点击即可下载、校验、替换并重启，探索和 API 配置会保留；有运行任务时需先等待完成。也可使用「Drevi → 检查更新…」手动检查。
+
+**v0.9.9 正式更名为 Drevi · 梦络**，统一应用、工作台、配置命名与捕梦网图标，并保留已有探索和模型配置。旧版 Panel 用户请退出旧 App，手动下载并打开 `Drevi.app` 完成首次升级；旧版更新器不能跨应用标识升级。已有数据继续使用原目录，新安装默认使用 Drevi 目录。后续版本通过 Drevi 内置更新器更新。
 
 v0.9.8 调整思考强度 max 档位的像素效果，移除整体光晕，使像素闪烁的颜色与发光保持一致。使用旧版更新器可识别的三段数字版本，安装包已通过 v0.9.1、v0.9.6 和 v0.9.7 更新器的完整解压与签名校验。
 
@@ -77,8 +80,8 @@ v0.9 新增系统编码沙盒，主代理和 Pi 子代理的命令写入限于�
 需要 **Node.js ≥ 22.19** 和 **Git**。
 
 ```bash
-git clone --recurse-submodules https://github.com/H0ypothesis/panel.git
-cd panel
+git clone --recurse-submodules https://github.com/H0ypothesis/drevi.git
+cd drevi
 npm ci --ignore-scripts
 npm run setup:pi
 npm run dev
@@ -99,12 +102,12 @@ npm start           # 启动生产模式本地服务
 
 ## 数据与运行方式
 
-Panel 面向本地单用户使用，服务仅监听本机地址。探索记录、附件和配置保存在本地；调用模型或联网工具时，会把相关内容发送到你配置的服务。
+Drevi 面向本地单用户使用，服务仅监听本机地址。探索记录、附件和配置保存在本地；调用模型或联网工具时，会把相关内容发送到你配置的服务。
 
 | 运行方式          | 默认数据位置                            |
 | ----------------- | --------------------------------------- |
-| macOS App         | `~/Library/Application Support/Panel/`  |
-| 源码启动的 Web 版 | 项目下的 `.panel/`，环境配置位于 `.env` |
+| macOS App         | `~/Library/Application Support/Drevi/`  |
+| 源码启动的 Web 版 | 项目下的 `.drevi/`，环境配置位于 `.env` |
 
 两种运行方式使用独立的数据目录，可通过 JSON 导出和导入迁移探索。模型密钥不随探索导出。
 

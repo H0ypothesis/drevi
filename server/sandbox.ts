@@ -26,7 +26,7 @@ export async function prepareSandbox(
 ) {
   signal?.throwIfAborted();
   const temporary = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-sandbox-")),
+    await mkdtemp(join(tmpdir(), "drevi-sandbox-")),
   );
   let worker: ChildProcess | undefined;
   let closed: Promise<void> | undefined;

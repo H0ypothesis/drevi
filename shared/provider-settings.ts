@@ -89,7 +89,7 @@ export interface ProviderSettings {
   id: string;
   name: string;
   baseUrl: string;
-  /** Provider-local model ID, without Panel's provider prefix. */
+  /** Provider-local model ID, without Drevi's provider prefix. */
   model: string;
   apiKeyConfigured: boolean;
   supportsContextWindow?: boolean;

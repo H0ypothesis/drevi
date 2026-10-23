@@ -93,7 +93,7 @@ class MergeRuntime implements Runtime {
   }
 }
 async function setup(t: TestContext) {
-  const directory = await mkdtemp(join(tmpdir(), "panel-merge-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-merge-"));
   const store = new Store(directory);
   await store.init(false);
   const data = fixture();

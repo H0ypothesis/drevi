@@ -49,7 +49,7 @@ async function fixture(
   responseCount = 30,
 ) {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-subagents-")),
+    await mkdtemp(join(tmpdir(), "drevi-subagents-")),
   );
   const project = join(directory, "project");
   await mkdir(project);
@@ -75,7 +75,7 @@ async function fixture(
     override subagentHost(config: RunConfig, environment: RunEnvironment) {
       if (!untrustedCodingTools) return super.subagentHost(config, environment);
       // Exercise the original review boundary for extension-like capabilities
-      // with coding names, without giving them Panel's trusted sandbox marker.
+      // with coding names, without giving them Drevi's trusted sandbox marker.
       return super.subagentHost(config, {
         ...environment,
         beforeToolCall: (call, prepare, signal) =>
@@ -401,7 +401,7 @@ for (const mode of ["ask", "auto"] as const)
       assert.match(node.response, /PARENT_SUMMARY_AFTER_DENIAL/);
     });
 
-test("builtin researcher and evidence-auditor use native web contracts through durable Panel approval", async (t) => {
+test("builtin researcher and evidence-auditor use native web contracts through durable Drevi approval", async (t) => {
   const names = [
     "web_search",
     "fetch_content",
@@ -646,7 +646,7 @@ for (const explicit of [false, true])
   });
 
 for (const explicit of [false, true]) {
-  test(`${explicit ? "@subagents" : "automatic model delegation"} runs real nicobailon children through Panel authorization and persistence`, async (t) => {
+  test(`${explicit ? "@subagents" : "automatic model delegation"} runs real nicobailon children through Drevi authorization and persistence`, async (t) => {
     let children = 0;
     const env = await fixture(
       t,

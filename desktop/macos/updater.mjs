@@ -21,7 +21,7 @@ import { createInterface } from "node:readline";
 import yauzl from "yauzl";
 
 const run = promisify(execFile);
-const repository = "H0ypothesis/panel";
+const repository = "H0ypothesis/drevi";
 const api = `https://api.github.com/repos/${repository}/releases`;
 const releaseFeed = `https://raw.githubusercontent.com/${repository}/main/updates/macos.json`;
 const maxArchive = 512 * 1024 * 1024;
@@ -58,7 +58,7 @@ export function releaseCandidate(
   if (compareVersions(release.tag_name, current) <= 0) return null;
   // A plain v0.5 tag is eligible even if GitHub marks it as a preview. Suffixes
   // such as -beta/-rc and the old date-based preview tags are never selected.
-  const name = `Panel-mac-${architecture}.zip`;
+  const name = `Drevi-mac-${architecture}.zip`;
   const asset = release.assets?.find(
     (item) => item.name === name && item.state === "uploaded",
   );
@@ -87,7 +87,7 @@ async function githubJSON(url, fetchMetadata = fetch) {
   const response = await fetchMetadata(url, {
     headers: {
       Accept: "application/vnd.github+json",
-      "User-Agent": "Panel-Updater",
+      "User-Agent": "Drevi-Updater",
       "X-GitHub-Api-Version": "2022-11-28",
     },
     signal: AbortSignal.timeout(15_000),
@@ -239,7 +239,7 @@ export async function downloadArchive(
     response = await fetchAsset(url, {
       redirect: "manual",
       signal: AbortSignal.timeout(10 * 60_000),
-      headers: { "User-Agent": "Panel-Updater" },
+      headers: { "User-Agent": "Drevi-Updater" },
     });
     if (![301, 302, 303, 307, 308].includes(response.status)) break;
     const location = response.headers.get("location");
@@ -309,8 +309,8 @@ export async function extractArchive(archive, destination) {
           )
             throw new Error("安装包包含不安全的路径。");
           if (name.startsWith("__MACOSX/")) return;
-          if (name !== "Panel.app/" && !name.startsWith("Panel.app/"))
-            throw new Error("安装包包含非 Panel 文件。");
+          if (name !== "Drevi.app/" && !name.startsWith("Drevi.app/"))
+            throw new Error("安装包包含非 Drevi 文件。");
           const path = resolve(destination, name);
           if (!within(destination, path))
             throw new Error("安装包路径超出目标目录。");
@@ -349,7 +349,7 @@ export async function extractArchive(archive, destination) {
               !target ||
               target.includes("\0") ||
               !within(
-                join(destination, "Panel.app"),
+                join(destination, "Drevi.app"),
                 resolve(dirname(path), target),
               )
             )
@@ -372,10 +372,10 @@ export async function extractArchive(archive, destination) {
     // a symlink. Check complete link chains before allowing this app to run.
     for (const { path, target } of links) await symlink(target, path);
     for (const { path } of links) {
-      if (!within(join(destination, "Panel.app"), await realpath(path)))
+      if (!within(join(destination, "Drevi.app"), await realpath(path)))
         throw new Error("安装包包含外部符号链接。");
     }
-    return join(destination, "Panel.app");
+    return join(destination, "Drevi.app");
   } finally {
     zip.close();
   }
@@ -413,7 +413,7 @@ export function supportsArchitecture(header, architecture) {
 
 export async function validateApp(app, version) {
   if (
-    (await plist(app, "CFBundleIdentifier")) !== "app.panel.desktop" ||
+    (await plist(app, "CFBundleIdentifier")) !== "app.drevi.desktop" ||
     compareVersions(await plist(app, "CFBundleShortVersionString"), version) !==
       0
   )
@@ -425,11 +425,11 @@ export async function validateApp(app, version) {
   if (compareVersions(minimum, system) > 0)
     throw new Error(`新版需要 macOS ${minimum} 或更高版本。`);
   const executable = await plist(app, "CFBundleExecutable");
-  if (executable !== "Panel") throw new Error("安装包主程序无效。");
-  await access(join(app, "Contents/MacOS/Panel"), constants.X_OK);
+  if (executable !== "Drevi") throw new Error("安装包主程序无效。");
+  await access(join(app, "Contents/MacOS/Drevi"), constants.X_OK);
   // lipo is an Xcode command-line-tools shim on some Macs. Read the Mach-O
   // header directly so end users never need developer tools to update.
-  const binary = await open(join(app, "Contents/MacOS/Panel"), "r");
+  const binary = await open(join(app, "Contents/MacOS/Drevi"), "r");
   try {
     const { buffer, bytesRead } = await binary.read(
       Buffer.alloc(4096),
@@ -528,14 +528,14 @@ async function main() {
     if (!Number.isSafeInteger(pid) || pid <= 1 || pid !== process.ppid)
       throw new Error("更新进程来源无效。");
     if (!(await lstat(appPath)).isDirectory() || !appPath.endsWith(".app"))
-      throw new Error("请将 Panel 放到可写的「应用程序」目录后再更新。");
+      throw new Error("请将 Drevi 放到可写的「应用程序」目录后再更新。");
     const app = await realpath(appPath);
     await access(dirname(app), constants.W_OK);
     await validateApp(app, current);
     const candidate = await resolveTargetUpdate(current, target);
-    stage = join(dirname(app), `.panel-update-${randomUUID()}`);
+    stage = join(dirname(app), `.drevi-update-${randomUUID()}`);
     await mkdir(stage, { mode: 0o700 });
-    const archive = join(stage, "Panel.zip");
+    const archive = join(stage, "Drevi.zip");
     emit({ phase: "downloading", version: target, progress: 0 });
     await downloadArchive(candidate, archive, (progress) =>
       emit({ phase: "downloading", version: target, progress }),
@@ -577,7 +577,7 @@ async function main() {
   } catch (error) {
     const message =
       error.code === "EACCES" || error.code === "EROFS"
-        ? "安装位置不可写。请将 Panel 移到你的「应用程序」目录后重试。"
+        ? "安装位置不可写。请将 Drevi 移到你的「应用程序」目录后重试。"
         : error.message || "更新失败，请稍后重试。";
     emit({
       phase: "error",

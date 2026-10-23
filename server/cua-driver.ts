@@ -57,11 +57,11 @@ export function resolveCuaDriverLayout(
   const target =
     platform === "darwin" ? "darwin-universal" : `${platform}-${process.arch}`;
   const rootDir = resolve(options.rootDir ?? process.cwd());
-  const configured = options.binaryPath ?? process.env.PANEL_CUA_DRIVER_PATH;
+  const configured = options.binaryPath ?? process.env.DREVI_CUA_DRIVER_PATH;
   if (configured) {
     if (!isAbsolute(configured))
       throw new Error(
-        "PANEL_CUA_DRIVER_PATH must be an absolute executable or .app path.",
+        "DREVI_CUA_DRIVER_PATH must be an absolute executable or .app path.",
       );
     const binaryPath = configured.endsWith(".app")
       ? join(configured, "Contents/MacOS/cua-driver")
@@ -76,7 +76,14 @@ export function resolveCuaDriverLayout(
   const bundled = join(rootDir, "cua-driver", CUA_DRIVER_VERSION, target);
   const runtime = existsSync(bundled)
     ? bundled
-    : join(rootDir, ".panel/cua-driver", CUA_DRIVER_VERSION, target);
+    : join(
+        rootDir,
+        existsSync(join(rootDir, ".drevi/cua-driver"))
+          ? ".drevi/cua-driver"
+          : ".panel/cua-driver",
+        CUA_DRIVER_VERSION,
+        target,
+      );
   return platform === "darwin"
     ? {
         target,
@@ -120,7 +127,7 @@ async function abortable<T>(
   });
 }
 
-// stdin is a lease. If Panel dies (including SIGKILL), EOF makes this short-lived
+// stdin is a lease. If Drevi dies (including SIGKILL), EOF makes this short-lived
 // watchdog stop only the private daemon. It does not register any auto-start job.
 const LEASE_SCRIPT = `
 if IFS= read -r _; then exit 0; fi
@@ -151,7 +158,7 @@ export function cuaDaemonLaunchArgs(
   if (platform === "darwin") {
     if (!layout.appPath)
       throw new Error(
-        "macOS Cua Driver requires the official signed CuaDriver.app. Point PANEL_CUA_DRIVER_PATH at the app bundle.",
+        "macOS Cua Driver requires the official signed CuaDriver.app. Point DREVI_CUA_DRIVER_PATH at the app bundle.",
       );
     return {
       command: "/usr/bin/open",
@@ -178,14 +185,14 @@ async function launchDaemon(
 ): Promise<DaemonHandle> {
   if (platform === "win32")
     throw new Error(
-      "Panel Cua Driver currently supports macOS and Linux; Windows daemon supervision is not configured.",
+      "Drevi Cua Driver currently supports macOS and Linux; Windows daemon supervision is not configured.",
     );
-  const directory = await mkdtemp(join(tmpdir(), "panel-cua-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-cua-"));
   // macOS Unix socket paths have a 104-byte ceiling; temp roots can be long.
   const socket =
     Buffer.byteLength(join(directory, "driver.sock")) < 100
       ? join(directory, "driver.sock")
-      : join("/tmp", `panel-cua-${randomUUID()}.sock`);
+      : join("/tmp", `drevi-cua-${randomUUID()}.sock`);
   const pidFile = join(directory, "driver.pid");
   let lease: ChildProcess | undefined;
   let daemon: ChildProcess | undefined;
@@ -248,7 +255,7 @@ async function launchDaemon(
     signal.throwIfAborted();
     lease = spawn(
       "/bin/sh",
-      ["-c", LEASE_SCRIPT, "panel-cua-lease", layout.binaryPath, socket],
+      ["-c", LEASE_SCRIPT, "drevi-cua-lease", layout.binaryPath, socket],
       { env: cuaDriverEnvironment(), stdio: ["pipe", "ignore", "ignore"] },
     );
     await new Promise<void>((resolvePromise, reject) => {
@@ -297,7 +304,7 @@ async function launchDaemon(
   }
 }
 
-/** One Panel host owns one daemon. Each run owns a separate MCP transport/session. */
+/** One Drevi host owns one daemon. Each run owns a separate MCP transport/session. */
 export class CuaDriverService {
   readonly layout: CuaDriverLayout;
   readonly requestTimeoutMs: number;
@@ -347,7 +354,7 @@ export class CuaDriverService {
         : !installed
           ? {
               message:
-                "Run npm run setup:cua in the Panel project to download the verified official runtime.",
+                "Run npm run setup:cua in the Drevi project to download the verified official runtime.",
             }
           : {}),
     };
@@ -434,7 +441,7 @@ export class CuaDriverService {
         maxBufferSize: 24 * 1024 * 1024,
       });
     const client = new Client(
-      { name: "panel-computer-use", version: "0.1.0" },
+      { name: "drevi-computer-use", version: "0.1.0" },
       { capabilities: {} },
     );
     try {
@@ -540,7 +547,7 @@ export class CuaDriverService {
   close(): Promise<void> {
     if (this.closing) return this.closing;
     this.closing = (async () => {
-      this.lifecycle.abort(new Error("Panel Cua Driver is shutting down."));
+      this.lifecycle.abort(new Error("Drevi Cua Driver is shutting down."));
       await Promise.allSettled([...this.permissionRequests]);
       await Promise.allSettled(
         [...this.sessions].map((session) => session.close()),
@@ -557,7 +564,7 @@ export class CuaDriverService {
 }
 
 export class CuaDriverSession {
-  readonly id = `panel-${randomUUID()}`;
+  readonly id = `drevi-${randomUUID()}`;
   private connectionGeneration = 0;
   /** Changes on reconnect/invalidation. Browser capability caches must match it. */
   get generation(): number {

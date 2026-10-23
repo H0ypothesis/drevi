@@ -2,9 +2,12 @@ node_modules/
 dist/
 build/
 release/
-.panel/
+.drevi/
 .env
 .env.*
 !.env.example
 artifacts/
 .DS_Store
+
+# Legacy user data remains private after upgrading.
+.panel/

@@ -20,7 +20,7 @@ async function until(check: () => boolean) {
 
 async function fixture(t: TestContext) {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-wake-")),
+    await mkdtemp(join(tmpdir(), "drevi-wake-")),
   );
   const project = join(directory, "project");
   await mkdir(project);

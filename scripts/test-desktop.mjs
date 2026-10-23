@@ -19,12 +19,12 @@ import { createRequire } from "node:module";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const app = resolve(
-  process.env.PANEL_TEST_APP ||
-    join(root, "release/Panel.app/Contents/Resources/app"),
+  process.env.DREVI_TEST_APP ||
+    join(root, "release/Drevi.app/Contents/Resources/app"),
 );
 const node =
-  process.env.PANEL_NODE_BINARY || resolve(app, "../runtime/bin/node");
-const directory = await mkdtemp(join(tmpdir(), "panel-desktop-test-"));
+  process.env.DREVI_NODE_BINARY || resolve(app, "../runtime/bin/node");
+const directory = await mkdtemp(join(tmpdir(), "drevi-desktop-test-"));
 const readyFile = join(directory, "server.json");
 const environment = {
   PATH: process.env.PATH,
@@ -32,10 +32,10 @@ const environment = {
   TMPDIR: tmpdir(),
   NODE_ENV: "production",
   PORT: "0",
-  PANEL_ENV_FILE: join(directory, ".env"),
-  PANEL_DATA_DIR: join(directory, "data"),
-  PANEL_DESKTOP_READY_FILE: readyFile,
-  PANEL_DESKTOP_PARENT_PID: String(process.pid),
+  DREVI_ENV_FILE: join(directory, ".env"),
+  DREVI_DATA_DIR: join(directory, "data"),
+  DREVI_DESKTOP_READY_FILE: readyFile,
+  DREVI_DESKTOP_PARENT_PID: String(process.pid),
 };
 let child;
 let blocker;
@@ -240,7 +240,7 @@ try {
   assert.deepEqual(await api("/api/models"), models);
   await new Promise((resolve) => modelService.close(resolve));
   modelService = undefined;
-  const testKey = "panel-desktop-test-key-not-a-real-credential";
+  const testKey = "drevi-desktop-test-key-not-a-real-credential";
   const configured = await api(
     "/api/model-providers/openai",
     {
@@ -518,7 +518,7 @@ Return a short answer.`,
   // Exercise recovery in the actual bundle without changing installed files.
   if (process.platform === "darwin") {
     await stop();
-    // Keep Panel's bridge below the macOS socket-path limit, while the
+    // Keep Drevi's bridge below the macOS socket-path limit, while the
     // sandbox's additional private directory pushes its proxy over the limit.
     const longTemporary = (recoveryTemporary = await realpath(
       await mkdtemp(join("/private/tmp", "p-rec-" + "x".repeat(42))),
@@ -835,7 +835,7 @@ Return a short answer.`,
   console.log(
     "PASS: bundled OS sandbox executes project commands, protects credentials and blocks outside writes",
   );
-  await start({ PANEL_DESKTOP_PARENT_PID: "2147483646" });
+  await start({ DREVI_DESKTOP_PARENT_PID: "2147483646" });
   const exited = once(child, "close");
   const timeout = setTimeout(() => child.kill("SIGKILL"), 4000);
   const [code] = await exited;

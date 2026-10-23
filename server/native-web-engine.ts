@@ -223,7 +223,7 @@ export async function createNativeWebHost() {
             .map((item) => item.text)
             .join("\n") +
           (details.fetchUrls
-            ? "\nPanel 已等待本次附带的原文获取结束，可按 fetchId 读取正文或失败信息。"
+            ? "\nDrevi 已等待本次附带的原文获取结束，可按 fetchId 读取正文或失败信息。"
             : ""),
         sources: sourcesFor(responseId),
         details: { ...details, ...(responseId ? { responseId } : {}) },

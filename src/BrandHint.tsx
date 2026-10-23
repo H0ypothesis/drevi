@@ -1,3 +1,4 @@
+import { Dreamcatcher } from "./Dreamcatcher";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowUpRight } from "lucide-react";
 
@@ -59,34 +60,28 @@ export function BrandHint({
       <button
         ref={trigger}
         className="brand-hint-trigger"
-        aria-label="关于 Panel"
+        aria-label="关于 Drevi"
         aria-expanded={available && open}
-        aria-controls="panel-brand-hint"
+        aria-controls="drevi-brand-hint"
         onClick={() => setOpen(true)}
       >
         {children}
       </button>
       <div
-        id="panel-brand-hint"
+        id="drevi-brand-hint"
         className="thought-card brand-hint-card"
         role="region"
-        aria-labelledby="panel-brand-hint-title"
+        aria-labelledby="drevi-brand-hint-title"
         hidden={!available || !open}
       >
-        <div className="mini-tree" aria-hidden="true">
-          <i />
-          <i />
-          <i />
-          <i />
-          <svg viewBox="0 0 150 42">
-            <path d="M8 22H43Q53 22 61 11H89M53 22H108M53 22Q61 35 81 35H134" />
-          </svg>
+        <div className="brand-dreamcatcher">
+          <Dreamcatcher size={46} />
         </div>
-        <b id="panel-brand-hint-title">好想法，值得多走一条路。</b>
+        <b id="drevi-brand-hint-title">捕捉灵感，织出可能。</b>
         <p>
-          从任意节点出发，
+          Catch ideas.
           <br />
-          让不同的可能同时生长。
+          Weave possibilities.
         </p>
         <button
           onClick={() => {

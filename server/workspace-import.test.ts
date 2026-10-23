@@ -99,7 +99,7 @@ test("imports sandbox audit without restoring trusted provenance or execution au
       executionMode: "host",
       startedAt: 1,
       sandbox: {
-        policyVersion: "panel-sandbox-v1",
+        policyVersion: "drevi-sandbox-v1",
         workingDirectory: "/tmp/project",
       },
       authorization: {

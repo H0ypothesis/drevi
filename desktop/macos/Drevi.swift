@@ -2,7 +2,7 @@ import AppKit
 import WebKit
 import Darwin
 
-final class PanelWindow: NSWindow {
+final class DreviWindow: NSWindow {
     // This is the same native-point strip reserved by desktop-titlebar-inset.
     var titlebarInset: CGFloat {
         max(28, (contentView?.bounds.height ?? frame.height) - contentLayoutRect.height)
@@ -27,9 +27,9 @@ final class PanelWindow: NSWindow {
 
 // A transparent native view handles only the reserved titlebar strip. All other
 // hit tests reach the web view so selection and canvas gestures remain intact.
-final class PanelTitlebarView: NSView {
+final class DreviTitlebarView: NSView {
     override func hitTest(_ point: NSPoint) -> NSView? {
-        guard let window = window as? PanelWindow, let parent = superview,
+        guard let window = window as? DreviWindow, let parent = superview,
               window.isTitlebarBackground(parent.convert(point, to: nil)) else { return nil }
         return self
     }
@@ -52,11 +52,11 @@ final class PanelTitlebarView: NSView {
 
 // The renderer has only explicit native conveniences. No filesystem or shell API is
 // exposed to JavaScript; the local server remains responsible for tool approval.
-final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
+final class DreviApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
     WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandlerWithReply, WKDownloadDelegate {
-    private var window: PanelWindow!
+    private var window: DreviWindow!
     private var container: NSView!
-    private var titlebarView: PanelTitlebarView!
+    private var titlebarView: DreviTitlebarView!
     private var webView: WKWebView?
     private var computerPreview: CuaPreviewController?
     private var statusView: NSView?
@@ -71,7 +71,7 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
     private var stopping = false
     private var terminating = false
     private var checkingRestart = false
-    private let updater = PanelUpdater()
+    private let updater = DreviUpdater()
     private var checkingUpdateInstall = false
     private var installingUpdate = false
     private var lockDescriptor: Int32 = -1
@@ -84,8 +84,11 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
 
     private let files = FileManager.default
     private var supportURL: URL {
-        files.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("Panel", isDirectory: true)
+        let base = files.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        let current = base.appendingPathComponent("Drevi", isDirectory: true)
+        let legacy = base.appendingPathComponent("Panel", isDirectory: true)
+        // Keep existing records, keys, absolute file paths and instance locking.
+        return !files.fileExists(atPath: current.path) && files.fileExists(atPath: legacy.path) ? legacy : current
     }
     private var dataURL: URL { supportURL.appendingPathComponent("data", isDirectory: true) }
     private var readyURL: URL { supportURL.appendingPathComponent("server.json") }
@@ -101,7 +104,7 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
             guard acquireInstanceLock() else { return }
             try prepareSettings()
         } catch {
-            showFatalError("无法准备 Panel 数据目录", error.localizedDescription)
+            showFatalError("无法准备 Drevi 数据目录", error.localizedDescription)
             return
         }
         makeMenu()
@@ -123,18 +126,18 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
     private func acquireInstanceLock() -> Bool {
         let lockURL = supportURL.appendingPathComponent("desktop.lock")
         lockDescriptor = Darwin.open(lockURL.path, O_CREAT | O_RDWR | O_CLOEXEC, 0o600)
-        guard lockDescriptor >= 0 else { showFatalError("无法启动 Panel", "无法创建应用锁文件。"); return false }
+        guard lockDescriptor >= 0 else { showFatalError("无法启动 Drevi", "无法创建应用锁文件。"); return false }
         guard flock(lockDescriptor, LOCK_EX | LOCK_NB) == 0 else {
             Darwin.close(lockDescriptor)
             lockDescriptor = -1
             let others = NSRunningApplication.runningApplications(
-                withBundleIdentifier: Bundle.main.bundleIdentifier ?? "app.panel.desktop")
+                withBundleIdentifier: Bundle.main.bundleIdentifier ?? "app.drevi.desktop")
                 .filter { $0.processIdentifier != getpid() }
             if let other = others.first {
                 other.activate(options: [.activateAllWindows, .activateIgnoringOtherApps])
                 if let url = other.bundleURL { NSWorkspace.shared.open(url) }
             } else {
-                showAlert("Panel 已在运行", "另一个 Panel 正在使用此数据目录。请先退出已有实例。")
+                showAlert("Drevi 已在运行", "另一个 Drevi 正在使用此数据目录。请先退出已有实例。")
             }
             NSApp.terminate(nil)
             return false
@@ -146,10 +149,10 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
     }
 
     private func makeWindow() {
-        window = PanelWindow(contentRect: NSRect(x: 0, y: 0, width: 1440, height: 920),
+        window = DreviWindow(contentRect: NSRect(x: 0, y: 0, width: 1440, height: 920),
                           styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
                           backing: .buffered, defer: false)
-        window.title = "Panel"
+        window.title = "Drevi · 梦络"
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
         window.titlebarSeparatorStyle = .none
@@ -158,11 +161,11 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
         window.delegate = self
         window.tabbingMode = .disallowed
         window.center()
-        window.setFrameAutosaveName("PanelMainWindow")
+        window.setFrameAutosaveName("DreviMainWindow")
         container = NSView(frame: window.contentView?.bounds ?? NSRect(origin: .zero, size: window.frame.size))
         container.autoresizingMask = [.width, .height]
         window.contentView = container
-        titlebarView = PanelTitlebarView(frame: container.bounds)
+        titlebarView = DreviTitlebarView(frame: container.bounds)
         titlebarView.autoresizingMask = [.width, .height]
         container.addSubview(titlebarView)
         window.makeKeyAndOrderFront(nil)
@@ -171,8 +174,8 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
 
     private func makeMenu() {
         let main = NSMenu()
-        let applicationMenu = NSMenu(title: "Panel")
-        applicationMenu.addItem(item("关于 Panel", #selector(about)))
+        let applicationMenu = NSMenu(title: "Drevi")
+        applicationMenu.addItem(item("关于 Drevi", #selector(about)))
         applicationMenu.addItem(item("检查更新…", #selector(checkForUpdates)))
         applicationMenu.addItem(.separator())
         applicationMenu.addItem(item("模型配置…", #selector(openSettings), ","))
@@ -185,13 +188,13 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
         applicationMenu.addItem(servicesItem)
         NSApp.servicesMenu = services
         applicationMenu.addItem(.separator())
-        applicationMenu.addItem(NSMenuItem(title: "隐藏 Panel", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h"))
+        applicationMenu.addItem(NSMenuItem(title: "隐藏 Drevi", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h"))
         let hideOthers = NSMenuItem(title: "隐藏其他", action: #selector(NSApplication.hideOtherApplications(_:)), keyEquivalent: "h")
         hideOthers.keyEquivalentModifierMask = [.command, .option]
         applicationMenu.addItem(hideOthers)
         applicationMenu.addItem(NSMenuItem(title: "显示全部", action: #selector(NSApplication.unhideAllApplications(_:)), keyEquivalent: ""))
         applicationMenu.addItem(.separator())
-        applicationMenu.addItem(NSMenuItem(title: "退出 Panel", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        applicationMenu.addItem(NSMenuItem(title: "退出 Drevi", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         attach(applicationMenu, to: main)
 
         let file = NSMenu(title: "文件")
@@ -239,7 +242,7 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
         NSApp.windowsMenu = windows
 
         let help = NSMenu(title: "帮助")
-        help.addItem(item("Panel 使用帮助", #selector(helpPanel)))
+        help.addItem(item("Drevi 使用帮助", #selector(helpPanel)))
         help.addItem(item("显示服务日志", #selector(openLogs)))
         attach(help, to: main)
         NSApp.helpMenu = help
@@ -262,7 +265,7 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
         guard !files.fileExists(atPath: settingsURL.path) else { return }
         guard let template = Bundle.main.resourceURL?.appendingPathComponent("app/.env.example"),
               files.fileExists(atPath: template.path) else {
-            throw NSError(domain: "Panel", code: 1, userInfo: [NSLocalizedDescriptionKey: "安装包缺少模型配置模板。"])
+            throw NSError(domain: "Drevi", code: 1, userInfo: [NSLocalizedDescriptionKey: "安装包缺少模型配置模板。"])
         }
         try files.copyItem(at: template, to: settingsURL)
         try files.setAttributes([.posixPermissions: 0o600], ofItemAtPath: settingsURL.path)
@@ -274,7 +277,7 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
         let generation = launchGeneration
         serviceURL = nil
         destroyWebView()
-        showStatus("正在启动 Panel", "正在准备你的本地工作台…", retry: false)
+        showStatus("正在启动 Drevi", "正在准备你的本地工作台…", retry: false)
 
         // If the previous app was killed, give its parent-watchdog time to stop
         // the orphan before opening the same database from another process.
@@ -286,7 +289,7 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
             guard self.launchGeneration == generation, !self.terminating else { return }
             if let pid = oldPID, pid > 1, Darwin.kill(pid, 0) == 0 {
                 guard Date() < deadline else {
-                    self.showStatus("上次服务仍在退出", "请稍后重试。Panel 会等待旧服务结束，保护本地探索数据。", retry: true)
+                    self.showStatus("上次服务仍在退出", "请稍后重试。Drevi 会等待旧服务结束，保护本地探索数据。", retry: true)
                     return
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: waitForOldService)
@@ -305,7 +308,7 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
             let app = resources.appendingPathComponent("app", isDirectory: true)
             guard files.isExecutableFile(atPath: node.path),
                   files.fileExists(atPath: app.appendingPathComponent("server/index.mjs").path) else {
-                throw NSError(domain: "Panel", code: 2, userInfo: [NSLocalizedDescriptionKey: "安装包缺少 Node 运行时或本地服务，请重新构建应用。"])
+                throw NSError(domain: "Drevi", code: 2, userInfo: [NSLocalizedDescriptionKey: "安装包缺少 Node 运行时或本地服务，请重新构建应用。"])
             }
             try prepareLog()
             let process = Process()
@@ -315,11 +318,11 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
             var environment = ProcessInfo.processInfo.environment
             environment["NODE_ENV"] = "production"
             environment["PORT"] = "0"
-            environment["PANEL_DATA_DIR"] = dataURL.path
-            environment["PANEL_ENV_FILE"] = settingsURL.path
-            environment["PANEL_DESKTOP"] = "1"
-            environment["PANEL_DESKTOP_READY_FILE"] = readyURL.path
-            environment["PANEL_DESKTOP_PARENT_PID"] = String(getpid())
+            environment["DREVI_DATA_DIR"] = dataURL.path
+            environment["DREVI_ENV_FILE"] = settingsURL.path
+            environment["DREVI_DESKTOP"] = "1"
+            environment["DREVI_DESKTOP_READY_FILE"] = readyURL.path
+            environment["DREVI_DESKTOP_PARENT_PID"] = String(getpid())
             let pathComponents = [node.deletingLastPathComponent().path] +
                 (environment["PATH"] ?? "").split(separator: ":").map(String.init) +
                 ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin", "/usr/sbin", "/sbin"]
@@ -366,7 +369,7 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
         } catch {
             service = nil
             closeLog()
-            showStatus("无法启动 Panel", error.localizedDescription, retry: true)
+            showStatus("无法启动 Drevi", error.localizedDescription, retry: true)
         }
     }
 
@@ -382,7 +385,7 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
         }
         serviceLog = try FileHandle(forWritingTo: logURL)
         try serviceLog?.seekToEnd()
-        try serviceLog?.write(contentsOf: Data("\n[Panel \(Date())] Starting local service\n".utf8))
+        try serviceLog?.write(contentsOf: Data("\n[Drevi \(Date())] Starting local service\n".utf8))
     }
 
     private func closeLog() {
@@ -436,7 +439,7 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
         destroyWebView()
         let configuration = WKWebViewConfiguration()
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
-        configuration.userContentController.addScriptMessageHandler(self, contentWorld: .page, name: "panel")
+        configuration.userContentController.addScriptMessageHandler(self, contentWorld: .page, name: "drevi")
         let origin = "http://127.0.0.1:\(url.port!)"
         let source = """
         if (window === window.top && location.origin === '\(origin)') {
@@ -452,20 +455,20 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
             });
             observer.observe(document, {childList: true});
           }
-          Object.defineProperty(window, 'panelDesktop', { value: Object.freeze({
+          Object.defineProperty(window, 'dreviDesktop', { value: Object.freeze({
             platform: 'macos',
             get fullscreen() { return document.documentElement?.dataset.fullscreen === 'true'; },
-            chooseDirectory: () => window.webkit.messageHandlers.panel.postMessage({action:'choose-directory'}),
-            openSettings: () => window.webkit.messageHandlers.panel.postMessage({action:'open-settings'}),
-            openDataDirectory: () => window.webkit.messageHandlers.panel.postMessage({action:'open-data-directory'}),
-            openGeneratedFile: (target) => window.webkit.messageHandlers.panel.postMessage({action:'open-generated-file', target}),
-            revealGeneratedFile: (target) => window.webkit.messageHandlers.panel.postMessage({action:'reveal-generated-file', target}),
-            setAppearance: (theme) => window.webkit.messageHandlers.panel.postMessage({action:'set-appearance', theme}),
-            getUpdateState: () => window.webkit.messageHandlers.panel.postMessage({action:'update-state'}),
-            checkForUpdates: () => window.webkit.messageHandlers.panel.postMessage({action:'check-updates'}),
-            installUpdate: () => window.webkit.messageHandlers.panel.postMessage({action:'install-update'}),
-            setComputerUsePreview: (task) => window.webkit.messageHandlers.panel.postMessage({action:'computer-preview', task}),
-            closeComputerUsePreview: () => window.webkit.messageHandlers.panel.postMessage({action:'close-computer-preview'})
+            chooseDirectory: () => window.webkit.messageHandlers.drevi.postMessage({action:'choose-directory'}),
+            openSettings: () => window.webkit.messageHandlers.drevi.postMessage({action:'open-settings'}),
+            openDataDirectory: () => window.webkit.messageHandlers.drevi.postMessage({action:'open-data-directory'}),
+            openGeneratedFile: (target) => window.webkit.messageHandlers.drevi.postMessage({action:'open-generated-file', target}),
+            revealGeneratedFile: (target) => window.webkit.messageHandlers.drevi.postMessage({action:'reveal-generated-file', target}),
+            setAppearance: (theme) => window.webkit.messageHandlers.drevi.postMessage({action:'set-appearance', theme}),
+            getUpdateState: () => window.webkit.messageHandlers.drevi.postMessage({action:'update-state'}),
+            checkForUpdates: () => window.webkit.messageHandlers.drevi.postMessage({action:'check-updates'}),
+            installUpdate: () => window.webkit.messageHandlers.drevi.postMessage({action:'install-update'}),
+            setComputerUsePreview: (task) => window.webkit.messageHandlers.drevi.postMessage({action:'computer-preview', task}),
+            closeComputerUsePreview: () => window.webkit.messageHandlers.drevi.postMessage({action:'close-computer-preview'})
           }), writable: false, configurable: false });
         }
         """
@@ -499,7 +502,7 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
         downloadDestinations.removeAll()
         cancelledDownloads.removeAll()
         webView?.stopLoading()
-        webView?.configuration.userContentController.removeScriptMessageHandler(forName: "panel", contentWorld: .page)
+        webView?.configuration.userContentController.removeScriptMessageHandler(forName: "drevi", contentWorld: .page)
         webView?.navigationDelegate = nil
         webView?.uiDelegate = nil
         webView?.removeFromSuperview()
@@ -541,7 +544,7 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
               let expected = serviceURL, sameOrigin(webView?.url),
               origin.protocol == expected.scheme, origin.host == expected.host, origin.port == expected.port,
               let body = message.body as? [String: Any], let action = body["action"] as? String else {
-            replyHandler(nil, "仅允许 Panel 本机主页面调用原生功能。")
+            replyHandler(nil, "仅允许 Drevi 本机主页面调用原生功能。")
             return
         }
         switch action {
@@ -556,7 +559,7 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
                   let serviceURL = serviceURL else { replyHandler(nil, "预览任务无效。"); return }
             if computerPreview == nil {
                 computerPreview = CuaPreviewController(serviceURL: serviceURL, parent: window) { [weak self] in
-                    self?.webView?.evaluateJavaScript("window.dispatchEvent(new CustomEvent('panel:preview-closed'))", completionHandler: nil)
+                    self?.webView?.evaluateJavaScript("window.dispatchEvent(new CustomEvent('drevi:preview-closed'))", completionHandler: nil)
                 }
             }
             computerPreview?.show(workspaceID: workspaceID, nodeID: nodeID, revision: revision)
@@ -776,14 +779,14 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
     func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String,
                  initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
         guard frame.isMainFrame, sameOrigin(frame.request.url) else { completionHandler(); return }
-        showAlert("Panel", message)
+        showAlert("Drevi", message)
         completionHandler()
     }
 
     func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String,
                  initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
         guard frame.isMainFrame, sameOrigin(frame.request.url) else { completionHandler(false); return }
-        completionHandler(confirm("Panel", message, button: "确定"))
+        completionHandler(confirm("Drevi", message, button: "确定"))
     }
 
     func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
@@ -816,7 +819,7 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
             // file, then replace only after success, preserving an existing export
             // if this transfer is cancelled or fails.
             let temporary = destination.deletingLastPathComponent()
-                .appendingPathComponent(".panel-export-\(UUID().uuidString).tmp")
+                .appendingPathComponent(".drevi-export-\(UUID().uuidString).tmp")
             self.downloadDestinations[ObjectIdentifier(download)] = (temporary, destination)
             completionHandler(temporary)
         }
@@ -865,7 +868,7 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
         stack.alignment = .centerX
         stack.spacing = 16
         stack.translatesAutoresizingMaskIntoConstraints = false
-        let icon = NSImageView(image: NSImage(systemSymbolName: "square.stack.3d.up", accessibilityDescription: "Panel")!)
+        let icon = NSImageView(image: NSApp.applicationIconImage)
         icon.contentTintColor = .secondaryLabelColor
         icon.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 48, weight: .light)
         let heading = NSTextField(labelWithString: title)
@@ -922,7 +925,7 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
     @objc private func retryService() {
         guard !stopping, !terminating else { return }
         if let url = serviceURL, service?.isRunning == true {
-            showStatus("正在打开 Panel", "正在连接本地工作台…", retry: false)
+            showStatus("正在打开 Drevi", "正在连接本地工作台…", retry: false)
             makeWebView(url: url)
         } else { startService() }
     }
@@ -940,7 +943,7 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
                 guard self.confirm("重启本地服务？", message, button: "重启服务") else { return }
             }
             self.destroyWebView()
-            self.showStatus("正在重启 Panel", "正在保存探索并停止本地服务…", retry: false)
+            self.showStatus("正在重启 Drevi", "正在保存探索并停止本地服务…", retry: false)
             self.stopService { self.startService() }
         }
     }
@@ -962,7 +965,7 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
         guard let view = webView, sameOrigin(view.url),
               let bytes = try? JSONSerialization.data(withJSONObject: updater.state),
               let json = String(data: bytes, encoding: .utf8) else { return }
-        view.evaluateJavaScript("window.dispatchEvent(new CustomEvent('panel:update-state', {detail:\(json)}))", completionHandler: nil)
+        view.evaluateJavaScript("window.dispatchEvent(new CustomEvent('drevi:update-state', {detail:\(json)}))", completionHandler: nil)
     }
 
     private func beginUpdate() {
@@ -1031,18 +1034,18 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
     }
     @objc private func about() {
         NSApp.orderFrontStandardAboutPanel(options: [
-            .applicationName: "Panel", .applicationVersion: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "未知版本",
-            .credits: NSAttributedString(string: "本地优先的非线性 Agent 工作台\n探索每一种可能。")
+            .applicationName: "Drevi · 梦络", .applicationVersion: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "未知版本",
+            .credits: NSAttributedString(string: "Catch ideas. Weave possibilities.\n捕捉灵感，织出可能。")
         ])
     }
     @objc private func helpPanel() {
-        showAlert("开始使用 Panel", "⌘N 新建探索，⌘K 搜索，⌘W 关闭窗口。关闭窗口后任务会继续，点击 Dock 图标可再次打开。\n\n在「Panel → 模型配置」中填写模型密钥，保存后选择「Panel → 重启本地服务」。\n\n探索保存在本机 Application Support/Panel/data。编码操作沿用工作台内的审批规则。")
+        showAlert("开始使用 Drevi", "⌘N 新建探索，⌘K 搜索，⌘W 关闭窗口。关闭窗口后任务会继续，点击 Dock 图标可再次打开。\n\n在「Drevi → 模型配置」中填写模型密钥，保存后选择「Drevi → 重启本地服务」。\n\n探索保存在本机 Application Support/Drevi/data。编码操作沿用工作台内的审批规则。")
     }
 
     private func sendNativeAction(_ action: String) {
         guard let view = webView, sameOrigin(view.url) else { return }
         window.makeKeyAndOrderFront(nil)
-        view.evaluateJavaScript("window.dispatchEvent(new CustomEvent('panel:native-action', {detail:{action:'\(action)'}}))", completionHandler: nil)
+        view.evaluateJavaScript("window.dispatchEvent(new CustomEvent('drevi:native-action', {detail:{action:'\(action)'}}))", completionHandler: nil)
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
@@ -1085,14 +1088,14 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
             if count == nil || count! > 0 {
                 let message = count.map { "当前有 \($0) 个节点正在运行或排队。退出会中断这些任务；探索会保存，已经发生的文件修改会保留。" }
                     ?? "暂时无法读取任务状态。退出可能中断正在运行的任务；探索会保存，已经发生的文件修改会保留。"
-                if !self.confirm("退出 Panel？", message, button: "退出 Panel") {
+                if !self.confirm("退出 Drevi？", message, button: "退出 Drevi") {
                     self.terminating = false
                     sender.reply(toApplicationShouldTerminate: false)
                     return
                 }
             }
             self.destroyWebView()
-            self.showStatus("正在退出 Panel", "正在保存探索并停止本地服务…", retry: false)
+            self.showStatus("正在退出 Drevi", "正在保存探索并停止本地服务…", retry: false)
             self.stopService { sender.reply(toApplicationShouldTerminate: true) }
         }
         return .terminateLater
@@ -1137,10 +1140,10 @@ final class PanelApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
 }
 
 @main
-struct PanelMain {
+struct DreviMain {
     static func main() {
         let application = NSApplication.shared
-        let delegate = PanelApp()
+        let delegate = DreviApp()
         application.delegate = delegate
         application.setActivationPolicy(.regular)
         withExtendedLifetime(delegate) { application.run() }

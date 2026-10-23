@@ -4172,3 +4172,14 @@ select optgroup {
   border-radius: 4px;
   color: var(--text-muted);
 }
+
+/* The wordmark keeps the Chinese name legible at sidebar sizes. */
+.logo b .logo-chinese {
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  font-weight: 500;
+  vertical-align: middle;
+}
+.brand-dreamcatcher {
+  margin-bottom: 14px;
+}

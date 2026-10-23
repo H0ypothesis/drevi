@@ -116,7 +116,7 @@ test("older transcripts expose readable thinking without exposing provider signa
 });
 
 test("scheduler persists thinking independently, restores it, and clears it on regeneration", async (t) => {
-  const directory = await mkdtemp(join(tmpdir(), "panel-thinking-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-thinking-"));
   const store = new Store(directory);
   await store.init(false);
   const workspace = createWorkspace("思考测试", "");

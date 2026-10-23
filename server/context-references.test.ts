@@ -66,7 +66,7 @@ function source(
   return node;
 }
 async function fixture(t: TestContext) {
-  const directory = await mkdtemp(join(tmpdir(), "panel-references-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-references-"));
   const store = new Store(directory);
   await store.init(false);
   const workspace: StoredWorkspace = createWorkspace(

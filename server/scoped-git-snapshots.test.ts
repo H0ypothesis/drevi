@@ -42,7 +42,7 @@ async function git(args: string[]) {
 
 async function fixture(t: TestContext) {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-scoped-git-")),
+    await mkdtemp(join(tmpdir(), "drevi-scoped-git-")),
   );
   t.after(() => rm(directory, { recursive: true, force: true }));
   const cwd = join(directory, "work");
@@ -158,7 +158,7 @@ test("parallel first operations capture only their own files and restore indepen
   );
   assert.deepEqual(
     (await readdir(baselines[0].repository)).filter((name) =>
-      name.startsWith("panel-index"),
+      name.startsWith("drevi-index"),
     ),
     [],
   );
@@ -290,9 +290,9 @@ test("serialized scopes recover additions, deletions and permission-only changes
 
 test("scope preserves the existing exclusions and freezes ignore eligibility across parallel ignore edits", async (t) => {
   const { cwd } = await fixture(t);
-  const snapshots = new GitSnapshots(join(cwd, ".panel"));
+  const snapshots = new GitSnapshots(join(cwd, ".drevi"));
   await writeFile(join(cwd, ".gitignore"), "*.secret\nignored/\n");
-  for (const path of ["node_modules", "nested/.git", ".panel", "ignored"]) {
+  for (const path of ["node_modules", "nested/.git", ".drevi", "ignored"]) {
     await mkdir(join(cwd, path), { recursive: true });
     await writeFile(join(cwd, path, "data"), "excluded");
   }
@@ -303,7 +303,7 @@ test("scope preserves the existing exclusions and freezes ignore eligibility acr
     "ignored/data",
     "node_modules/data",
     "nested/.git/data",
-    ".panel/data",
+    ".drevi/data",
   ]);
   const visible = await snapshots.prepare("workspace", cwd, ["visible"]);
   assert.deepEqual(excluded.scope, []);

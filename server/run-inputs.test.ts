@@ -25,7 +25,7 @@ async function until(check: () => boolean) {
 }
 
 async function fixture(t: TestContext) {
-  const directory = await mkdtemp(join(tmpdir(), "panel-run-input-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-run-input-"));
   const store = new Store(directory);
   await store.init(false);
   const workspace = createWorkspace("Inputs", "Fixture context");

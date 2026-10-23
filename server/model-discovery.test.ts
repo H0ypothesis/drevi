@@ -13,7 +13,7 @@ import { Store } from "./store.ts";
 import { Scheduler } from "./scheduler.ts";
 
 async function setup(t: TestContext) {
-  const directory = await mkdtemp(join(tmpdir(), "panel-model-discovery-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-model-discovery-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const settings = new ModelProviderSettings(directory);
   await settings.init();

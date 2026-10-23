@@ -6,7 +6,7 @@ func readUpdateChunk(from handle: FileHandle) -> Data { handle.availableData }
 
 // All network, archive validation and replacement work runs in the bundled
 // helper. The renderer can request an update, but cannot supply URLs or paths.
-final class PanelUpdater {
+final class DreviUpdater {
     private let defaults: UserDefaults
     private let current: String
     private let resources: URL?
@@ -36,12 +36,12 @@ final class PanelUpdater {
     var installing: Bool { ["downloading", "verifying", "ready", "installing"].contains(state["phase"] as? String ?? "") }
 
     func start() {
-        if defaults.string(forKey: "PanelUpdateCheckedVersion") != current {
-            defaults.removeObject(forKey: "PanelAvailableUpdate")
-            defaults.removeObject(forKey: "PanelUpdateFailureCount")
+        if defaults.string(forKey: "DreviUpdateCheckedVersion") != current {
+            defaults.removeObject(forKey: "DreviAvailableUpdate")
+            defaults.removeObject(forKey: "DreviUpdateFailureCount")
         }
-        if let version = defaults.string(forKey: "PanelAvailableUpdate"),
-           defaults.string(forKey: "PanelUpdateCheckedVersion") == current {
+        if let version = defaults.string(forKey: "DreviAvailableUpdate"),
+           defaults.string(forKey: "DreviUpdateCheckedVersion") == current {
             state = ["phase": "available", "version": version]
         }
         schedule()
@@ -49,9 +49,9 @@ final class PanelUpdater {
 
     private func schedule() {
         timer?.invalidate()
-        let sameVersion = defaults.string(forKey: "PanelUpdateCheckedVersion") == current
-        let next = sameVersion ? defaults.object(forKey: "PanelNextUpdateCheck") as? Date
-            ?? (defaults.object(forKey: "PanelLastUpdateCheck") as? Date)?.addingTimeInterval(24 * 60 * 60)
+        let sameVersion = defaults.string(forKey: "DreviUpdateCheckedVersion") == current
+        let next = sameVersion ? defaults.object(forKey: "DreviNextUpdateCheck") as? Date
+            ?? (defaults.object(forKey: "DreviLastUpdateCheck") as? Date)?.addingTimeInterval(24 * 60 * 60)
             ?? .distantPast : .distantPast
         let remaining = max(0, next.timeIntervalSinceNow)
         if remaining <= 0 { check(manual: false); return }
@@ -81,22 +81,22 @@ final class PanelUpdater {
 
     private func finishCheck(_ result: [String: Any]) {
         let failed = result["phase"] as? String == "error"
-        let failures = failed ? min(10, defaults.integer(forKey: "PanelUpdateFailureCount") + 1) : 0
+        let failures = failed ? min(10, defaults.integer(forKey: "DreviUpdateFailureCount") + 1) : 0
         let retry = result["retryAfter"] as? Double ?? 0
         let delay = failed ? max(min(6 * 60 * 60, 30 * 60 * pow(2, Double(failures - 1))), retry.isFinite ? retry : 0) : 24 * 60 * 60
-        defaults.set(failures, forKey: "PanelUpdateFailureCount")
-        defaults.set(current, forKey: "PanelUpdateCheckedVersion")
-        defaults.set(Date().addingTimeInterval(delay), forKey: "PanelNextUpdateCheck")
+        defaults.set(failures, forKey: "DreviUpdateFailureCount")
+        defaults.set(current, forKey: "DreviUpdateCheckedVersion")
+        defaults.set(Date().addingTimeInterval(delay), forKey: "DreviNextUpdateCheck")
         if !failed {
-            defaults.set(Date(), forKey: "PanelLastUpdateCheck")
-            if let version = result["version"] as? String { defaults.set(version, forKey: "PanelAvailableUpdate") }
-            else { defaults.removeObject(forKey: "PanelAvailableUpdate") }
+            defaults.set(Date(), forKey: "DreviLastUpdateCheck")
+            if let version = result["version"] as? String { defaults.set(version, forKey: "DreviAvailableUpdate") }
+            else { defaults.removeObject(forKey: "DreviAvailableUpdate") }
         }
         state = result
         if failed {
             if !manualCheck { state = ["phase": "idle"] }
             else { state["operation"] = "check" }
-            if let version = defaults.string(forKey: "PanelAvailableUpdate") {
+            if let version = defaults.string(forKey: "DreviAvailableUpdate") {
                 state["version"] = version
                 if !manualCheck { state["phase"] = "available" }
             }
@@ -204,8 +204,8 @@ final class PanelUpdater {
             var next = value
             if phase == "error", next["version"] == nil { next["version"] = state["version"] }
             state = next
-            if phase == "available" { defaults.set(value["version"], forKey: "PanelAvailableUpdate") }
-            if phase == "idle" { defaults.removeObject(forKey: "PanelAvailableUpdate") }
+            if phase == "available" { defaults.set(value["version"], forKey: "DreviAvailableUpdate") }
+            if phase == "idle" { defaults.removeObject(forKey: "DreviAvailableUpdate") }
             onChange?()
             if phase == "ready" { onReady?() }
         }
@@ -213,7 +213,7 @@ final class PanelUpdater {
 
     func commit() throws {
         guard state["phase"] as? String == "ready", worker?.isRunning == true, let input = input else {
-            throw NSError(domain: "PanelUpdate", code: 1, userInfo: [NSLocalizedDescriptionKey: "更新进程已停止，请重试。"])
+            throw NSError(domain: "DreviUpdate", code: 1, userInfo: [NSLocalizedDescriptionKey: "更新进程已停止，请重试。"])
         }
         try input.write(contentsOf: Data("install\n".utf8))
         committed = true

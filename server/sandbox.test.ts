@@ -10,7 +10,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test, { type TestContext } from "node:test";
-import { codingSandboxScope, createPanelTools } from "./coding-tools.ts";
+import { codingSandboxScope, createDreviTools } from "./coding-tools.ts";
 import { createRunCodingTools } from "./run-coding-tools.ts";
 import type { RunEnvironment } from "./runtime.ts";
 import { prepareSandbox } from "./sandbox.ts";
@@ -19,12 +19,12 @@ import { sandboxConfig, SANDBOX_POLICY_VERSION } from "./sandbox-policy.ts";
 const quote = (value: string) => `'${value.replaceAll("'", "'\\''")}'`;
 async function fixture(t: TestContext) {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-isolation-")),
+    await mkdtemp(join(tmpdir(), "drevi-isolation-")),
   );
   t.after(() => rm(directory, { recursive: true, force: true }));
   const root = join(directory, "project");
   await mkdir(root);
-  const tools = createPanelTools(root);
+  const tools = createDreviTools(root);
   return {
     directory,
     root,
@@ -32,7 +32,7 @@ async function fixture(t: TestContext) {
   };
 }
 
-test("trusted sandbox provenance belongs to real Panel tools, not matching names or copies", async (t) => {
+test("trusted sandbox provenance belongs to real Drevi tools, not matching names or copies", async (t) => {
   const { root, tool } = await fixture(t);
   assert.deepEqual(codingSandboxScope(tool("bash"), root), {
     policyVersion: SANDBOX_POLICY_VERSION,
@@ -42,13 +42,13 @@ test("trusted sandbox provenance belongs to real Panel tools, not matching names
   assert.equal(codingSandboxScope({ name: "write" }, root), undefined);
 });
 
-test("file tools protect credentials, Panel state and executable configuration", async (t) => {
+test("file tools protect credentials, Drevi state and executable configuration", async (t) => {
   const { root, tool } = await fixture(t);
   for (const path of [
     "nested/.env",
     "private.key",
     ".npmrc",
-    ".panel/auth.json",
+    ".drevi/auth.json",
   ]) {
     await mkdir(join(root, path, ".."), { recursive: true });
     await writeFile(join(root, path), "original");
@@ -103,16 +103,16 @@ test("native sandbox blocks outside writes and existing credential reads and wri
   );
 });
 
-test("default workspaces can write beneath protected Panel state without exposing sibling state", async (t) => {
+test("default workspaces can write beneath protected Drevi state without exposing sibling state", async (t) => {
   const { directory } = await fixture(t);
   const state = join(directory, "state");
   const root = join(state, "workspaces/id");
   await mkdir(root, { recursive: true });
   await writeFile(join(state, "auth.json"), "state-secret");
-  const previous = process.env.PANEL_DATA_DIR;
-  process.env.PANEL_DATA_DIR = state;
+  const previous = process.env.DREVI_DATA_DIR;
+  process.env.DREVI_DATA_DIR = state;
   try {
-    const tools = createPanelTools(root);
+    const tools = createDreviTools(root);
     const bash = tools.find((tool) => tool.name === "bash")!;
     const config = await sandboxConfig(root, directory);
     assert.ok(!config.filesystem.denyWrite.includes(state));
@@ -124,10 +124,10 @@ test("default workspaces can write beneath protected Panel state without exposin
       bash.execute("state", { command: "cat ../../auth.json" }),
     );
     assert.equal(await readFile(join(root, "shell.txt"), "utf8"), "shell");
-    assert.throws(() => createPanelTools(state), /不能作为编码工作目录/);
+    assert.throws(() => createDreviTools(state), /不能作为编码工作目录/);
   } finally {
-    if (previous === undefined) delete process.env.PANEL_DATA_DIR;
-    else process.env.PANEL_DATA_DIR = previous;
+    if (previous === undefined) delete process.env.DREVI_DATA_DIR;
+    else process.env.DREVI_DATA_DIR = previous;
   }
 });
 
@@ -135,7 +135,7 @@ test("concurrent commands keep independent workspaces and policies", async (t) =
   const { directory, root, tool } = await fixture(t);
   const other = join(directory, "other");
   await mkdir(other);
-  const bash = createPanelTools(other).find((tool) => tool.name === "bash")!;
+  const bash = createDreviTools(other).find((tool) => tool.name === "bash")!;
   await Promise.all([
     tool("bash").execute("first", { command: "printf first > result.txt" }),
     bash.execute("second", { command: "printf second > result.txt" }),
@@ -152,14 +152,14 @@ test("sandbox uses a private temporary directory and removes it after execution"
   const temporary = result.content
     .flatMap((part) => (part.type === "text" ? [part.text] : []))
     .join("");
-  assert.match(temporary, /panel-sandbox-/);
+  assert.match(temporary, /drevi-sandbox-/);
   await assert.rejects(readFile(join(temporary, "marker")), { code: "ENOENT" });
 });
 
 test("network denial preserves command progress without replaying the shell", async (t) => {
   const { root } = await fixture(t);
   const requests: string[] = [];
-  const bash = createPanelTools(root, async (request) => {
+  const bash = createDreviTools(root, async (request) => {
     requests.push(request.host);
     return false;
   }).find((tool) => tool.name === "bash")!;
@@ -211,7 +211,7 @@ test("network target grants are reused within a run and invalidated on settings 
 test("private address literals cannot be permitted through the network callback", async (t) => {
   const { root } = await fixture(t);
   const requests: string[] = [];
-  const bash = createPanelTools(root, async (request) => {
+  const bash = createDreviTools(root, async (request) => {
     requests.push(request.host);
     return true;
   }).find((tool) => tool.name === "bash")!;
@@ -232,7 +232,7 @@ test("cancelling a waiting network request stops later shell effects", async (t)
   const requested = new Promise<void>((resolve) => {
     started = resolve;
   });
-  const bash = createPanelTools(root, async (_request, signal) => {
+  const bash = createDreviTools(root, async (_request, signal) => {
     started();
     return new Promise<boolean>((resolve) =>
       signal!.addEventListener("abort", () => resolve(false), { once: true }),

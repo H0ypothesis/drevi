@@ -1,12 +1,15 @@
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import type { ClientRequest, IncomingMessage, RequestOptions } from "node:http";
+import https from "node:https";
+import { syncBuiltinESMExports } from "node:module";
 import { Readable } from "node:stream";
 import test from "node:test";
 import { gzipSync } from "node:zlib";
 import {
   createPublicFetch,
   webUrl,
+  type WebRequestFactory,
   type WebTransportOptions,
 } from "./web-transport.ts";
 
@@ -57,7 +60,12 @@ function fixture(replies: Reply[], overrides: WebTransportOptions = {}) {
     },
     ...overrides,
   };
-  return { fetch: createPublicFetch(options), requests, hosts };
+  return {
+    fetch: createPublicFetch(options),
+    request: options.request!,
+    requests,
+    hosts,
+  };
 }
 
 test("publicFetch accepts URL and Request input, returns a fetch Response and pins DNS", async () => {
@@ -88,6 +96,12 @@ test("publicFetch rejects SSRF literals, schemes, credentials and all mixed priv
     "https://user:password@example.com/",
     "http://localhost/",
     "http://a.localhost/",
+    "http://LOCALHOST./",
+    "http://printer/",
+    "http://printer.local/",
+    "http://service.internal/",
+    "http://home.arpa/",
+    "http://router.home.arpa/",
     "http://127.1/",
     "http://0x7f000001/",
     "http://2130706433/",
@@ -98,6 +112,7 @@ test("publicFetch rejects SSRF literals, schemes, credentials and all mixed priv
     "http://192.168.0.1/",
     "http://192.0.2.1/",
     "http://198.18.0.1/",
+    "http://198.19.255.254/",
     "http://198.51.100.1/",
     "http://203.0.113.1/",
     "http://224.0.0.1/",
@@ -123,6 +138,207 @@ test("publicFetch rejects SSRF literals, schemes, credentials and all mixed priv
   await assert.rejects(mixed.fetch("https://example.com/"), /非公共地址/);
   assert.equal(mixed.requests.length, 0);
   assert.equal(webUrl(new URL("https://example.com/#anchor")).hash, "");
+});
+
+test("Fake-IP DNS is replaced with verified public addresses and pinned without changing the hostname", async () => {
+  const verified: string[] = [];
+  for (const address of ["198.18.0.75", "198.19.255.254"]) {
+    const f = fixture([{ body: "proxy search result" }], {
+      lookup: async () => [{ address, family: 4 }],
+      lookupPublic: async (host) => {
+        verified.push(host);
+        return [{ address: "104.18.6.160", family: 4 }];
+      },
+    });
+    const response = await f.fetch("https://mcp.exa.ai/mcp", {
+      method: "POST",
+      body: '{"query":"proxy test"}',
+      headers: { "content-type": "application/json" },
+    });
+    assert.equal(await response.text(), "proxy search result");
+    assert.equal(f.requests[0].url.hostname, "mcp.exa.ai");
+    assert.equal(f.requests[0].body?.toString(), '{"query":"proxy test"}');
+    const pinned = await new Promise((resolve, reject) =>
+      f.requests[0].init.lookup!(
+        "mcp.exa.ai",
+        { all: true },
+        (error, result) => (error ? reject(error) : resolve(result)),
+      ),
+    );
+    assert.deepEqual(pinned, [{ address: "104.18.6.160", family: 4 }]);
+  }
+  assert.deepEqual(verified, ["mcp.exa.ai", "mcp.exa.ai"]);
+  const direct = fixture([{}], {
+    lookupPublic: async () => assert.fail("ordinary DNS must not use DoH"),
+  });
+  await direct.fetch("https://example.com/");
+});
+
+test("the production Fake-IP path bootstraps bounded DoH requests and connects only to the real public target", async (t) => {
+  const dns = fixture([
+    {
+      body: JSON.stringify({
+        Status: 0,
+        Answer: [{ type: 1, data: "104.18.6.160" }],
+      }),
+    },
+    { body: JSON.stringify({ Status: 0 }) },
+  ]);
+  const target = fixture([{ body: "real search response" }]);
+  const request: WebRequestFactory = (url, init, callback) =>
+    (url.hostname === "cloudflare-dns.com" ? dns : target).request(
+      url,
+      init,
+      callback,
+    );
+  const network = t.mock.method(
+    https,
+    "request",
+    request as typeof https.request,
+  );
+  syncBuiltinESMExports();
+  try {
+    const fetch = createPublicFetch({
+      lookup: async () => [{ address: "198.18.0.75", family: 4 }],
+    });
+    const response = await fetch("https://mcp.exa.ai/mcp", {
+      method: "POST",
+      body: '{"query":"test"}',
+      headers: { "x-api-key": "private-key" },
+    });
+    assert.equal(await response.text(), "real search response");
+    assert.equal(dns.requests.length, 2);
+    assert.equal(target.requests.length, 1);
+    for (const record of [...dns.requests, ...target.requests]) {
+      const address = await new Promise((resolve, reject) =>
+        record.init.lookup!(
+          record.url.hostname,
+          { all: true },
+          (error, result) => (error ? reject(error) : resolve(result)),
+        ),
+      );
+      const isDns = record.url.hostname === "cloudflare-dns.com";
+      assert.deepEqual(address, [
+        { address: isDns ? "1.1.1.1" : "104.18.6.160", family: 4 },
+      ]);
+      if (isDns) {
+        assert.equal(record.url.searchParams.get("name"), "mcp.exa.ai");
+        assert.equal(record.init.method, "GET");
+        assert.equal(record.body, undefined);
+        assert.equal(
+          (record.init.headers as Record<string, string>)["x-api-key"],
+          undefined,
+        );
+      }
+    }
+  } finally {
+    network.mock.restore();
+    syncBuiltinESMExports();
+  }
+});
+
+test("Fake-IP fallback never permits real internal targets, mixed answers or unverifiable DNS", async () => {
+  for (const address of [
+    "127.0.0.1",
+    "10.0.0.1",
+    "172.16.0.1",
+    "192.168.0.1",
+    "169.254.169.254",
+    "100.64.0.1",
+    "198.18.0.1",
+    "198.19.0.1",
+    "198.51.100.1",
+    "::1",
+    "fc00::1",
+    "::ffff:127.0.0.1",
+  ]) {
+    const f = fixture([], {
+      lookup: async () => [{ address: "198.18.0.75", family: 4 }],
+      lookupPublic: async () => [
+        { address: "93.184.216.34", family: 4 },
+        { address, family: address.includes(":") ? 6 : 4 },
+      ],
+    });
+    await assert.rejects(f.fetch("https://target.example/"), /非公共地址/);
+    assert.equal(f.requests.length, 0, address);
+  }
+  for (const address of ["127.0.0.1", "192.168.1.1"]) {
+    const mixed = fixture([], {
+      lookup: async () => [
+        { address: "198.18.0.75", family: 4 },
+        { address, family: 4 },
+      ],
+      lookupPublic: async () => assert.fail("must reject mixed internal DNS"),
+    });
+    await assert.rejects(mixed.fetch("https://example.com/"), /非公共地址/);
+    assert.equal(mixed.requests.length, 0);
+  }
+  for (const lookupPublic of [
+    async () => [],
+    async () => [{ address: "93.184.216.34", family: 6 }],
+    async () => {
+      throw new Error("resolver unavailable");
+    },
+  ]) {
+    const f = fixture([], {
+      lookup: async () => [{ address: "198.18.0.75", family: 4 }],
+      lookupPublic,
+    });
+    await assert.rejects(
+      f.fetch("https://example.com/"),
+      /非公共地址|DNS 校验失败/,
+    );
+    assert.equal(f.requests.length, 0);
+  }
+});
+
+test("Fake-IP redirects revalidate real DNS and never connect to an internal or rebound target", async () => {
+  for (const location of [
+    "http://127.0.0.1/",
+    "http://192.168.1.1/",
+    "http://198.18.0.75/",
+    "http://router.local/",
+    "https://internal.example/",
+    "/rebound",
+  ]) {
+    let resolutions = 0;
+    const f = fixture([{ status: 302, headers: { location } }], {
+      lookup: async () => [{ address: "198.18.0.75", family: 4 }],
+      lookupPublic: async () => [
+        {
+          address: resolutions++ === 0 ? "93.184.216.34" : "192.168.1.1",
+          family: 4,
+        },
+      ],
+    });
+    await assert.rejects(
+      f.fetch("https://example.com/"),
+      /公共互联网|非公共地址/,
+    );
+    assert.equal(f.requests.length, 1, location);
+  }
+});
+
+test("Fake-IP public DNS verification honors cancellation and the request timeout", async () => {
+  for (const cancel of [false, true]) {
+    const controller = new AbortController();
+    const f = fixture([], {
+      timeoutMs: cancel ? 30_000 : 10,
+      lookup: async () => [{ address: "198.18.0.75", family: 4 }],
+      lookupPublic: (_host, signal) =>
+        new Promise((_resolve, reject) => {
+          signal.addEventListener("abort", () => reject(signal.reason), {
+            once: true,
+          });
+          if (cancel) controller.abort();
+        }),
+    });
+    await assert.rejects(
+      f.fetch("https://example.com/", { signal: controller.signal }),
+      (error: Error) => error.name === (cancel ? "AbortError" : "TimeoutError"),
+    );
+    assert.equal(f.requests.length, 0);
+  }
 });
 
 test("publicFetch accepts global IPv6 directly", async () => {

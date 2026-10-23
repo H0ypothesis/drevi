@@ -10,8 +10,12 @@
         let preference;
         let palette;
         try {
-          preference = localStorage.getItem("panel:theme");
-          palette = localStorage.getItem("panel:palette");
+          preference =
+            localStorage.getItem("drevi:theme") ??
+            localStorage.getItem("panel:theme");
+          palette =
+            localStorage.getItem("drevi:palette") ??
+            localStorage.getItem("panel:palette");
         } catch {
           // System preference still works when browser storage is unavailable.
         }
@@ -42,7 +46,11 @@
           .setAttribute("content", background);
       })();
     </script>
-    <title>Panel · 让思考自由生长</title>
+    <title>Drevi · 梦络</title>
+    <meta
+      name="description"
+      content="Catch ideas. Weave possibilities. 捕捉灵感，织出可能。支持分支探索、多模型并行与融合的 Agent 工作台。"
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>

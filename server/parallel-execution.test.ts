@@ -15,7 +15,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { setTimeout as delay } from "node:timers/promises";
 import test, { type TestContext } from "node:test";
 import type { ModelOption, RunConfig, ToolCall } from "../shared/types.ts";
-import { createPanelTools } from "./coding-tools.ts";
+import { createDreviTools } from "./coding-tools.ts";
 import { createApi } from "./api.ts";
 import type { RunEnvironment, Runtime } from "./runtime.ts";
 import { Scheduler } from "./scheduler.ts";
@@ -54,7 +54,7 @@ interface Run {
 }
 async function fixture(t: TestContext) {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-parallel-")),
+    await mkdtemp(join(tmpdir(), "drevi-parallel-")),
   );
   const project = join(directory, "project");
   await mkdir(project);
@@ -128,7 +128,7 @@ async function fixture(t: TestContext) {
         arguments: args,
       };
       if (!(await run.environment.beforeToolCall(call))) return;
-      const tool = createPanelTools(run.environment.workingDirectory!).find(
+      const tool = createDreviTools(run.environment.workingDirectory!).find(
         (tool) => tool.name === name,
       );
       try {
@@ -427,7 +427,7 @@ test("Pi path aliases share locks and Git records with the actual written file",
     b = await e.submit("canonical");
   const hold = e.hold();
   let entered = false;
-  const tool = createPanelTools(e.project).find(
+  const tool = createDreviTools(e.project).find(
     (entry) => entry.name === "write",
   )!;
   const first = e.invoke(

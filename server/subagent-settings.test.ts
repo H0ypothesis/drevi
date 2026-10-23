@@ -12,7 +12,7 @@ import { Scheduler } from "./scheduler.ts";
 import { createApi } from "./api.ts";
 
 test("subagent settings persist through the API and reject invalid or cross-origin changes", async (t) => {
-  const directory = await mkdtemp(join(tmpdir(), "panel-subagent-settings-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-subagent-settings-"));
   const runtime = new PiRuntime();
   await runtime.initSubagentSettings(directory);
   const store = new Store(directory);
@@ -88,7 +88,7 @@ test("subagent settings persist through the API and reject invalid or cross-orig
 });
 
 test("failed saves retain the last persisted setting and do not break subsequent writes", async (t) => {
-  const directory = await mkdtemp(join(tmpdir(), "panel-subagent-settings-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-subagent-settings-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const settings = new LocalSubagentSettings(directory);
   await settings.init();
@@ -110,7 +110,7 @@ test("failed saves retain the last persisted setting and do not break subsequent
 });
 
 test("native limits and budgets persist independently and cannot be mutated through returned snapshots", async (t) => {
-  const directory = await mkdtemp(join(tmpdir(), "panel-native-settings-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-native-settings-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const settings = new LocalSubagentSettings(directory);
   await settings.init();

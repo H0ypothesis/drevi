@@ -12,7 +12,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import test, { type TestContext } from "node:test";
 import type { AgentToolResult } from "@earendil-works/pi-agent-core";
-import { createPanelTools } from "./coding-tools.ts";
+import { createDreviTools } from "./coding-tools.ts";
 import { createShellEnvironment } from "./shell-environment.ts";
 
 function output(result: AgentToolResult<unknown>) {
@@ -27,11 +27,11 @@ function quoted(value: string) {
 }
 
 async function fixture(t: TestContext) {
-  const directory = await mkdtemp(join(tmpdir(), "panel-tools-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-tools-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const cwd = join(directory, "work");
   await mkdir(cwd);
-  const tools = createPanelTools(cwd);
+  const tools = createDreviTools(cwd);
   const tool = (name: string) => {
     const found = tools.find((candidate) => candidate.name === name);
     assert.ok(found);
@@ -116,7 +116,7 @@ test("all file tools reject traversal, external symlinks and dangling symlinks",
 test("canonical workspaces allow internal symlinks and serialize edits across instances", async (t) => {
   const { directory, cwd, tool } = await fixture(t);
   await symlink(cwd, join(directory, "workspace-alias"));
-  const otherEdit = createPanelTools(join(directory, "workspace-alias")).find(
+  const otherEdit = createDreviTools(join(directory, "workspace-alias")).find(
     (candidate) => candidate.name === "edit",
   )!;
   await writeFile(join(cwd, "shared.txt"), "first = 0\nsecond = 0\n");
@@ -191,10 +191,10 @@ test("bash children cannot inherit server credentials or startup injections", as
     `require('node:fs').writeFileSync(${JSON.stringify(nodeMarker)}, 'injected');\n`,
   );
   const injections: Record<string, string> = {
-    OPENAI_API_KEY: "panel-test-provider-secret",
-    PANEL_TEST_UNKNOWN_SECRET: "panel-test-unknown-secret",
-    HTTPS_PROXY: "https://user:panel-test-secret@proxy.invalid",
-    SSH_AUTH_SOCK: "/tmp/panel-test-agent.sock",
+    OPENAI_API_KEY: "drevi-test-provider-secret",
+    DREVI_TEST_UNKNOWN_SECRET: "drevi-test-unknown-secret",
+    HTTPS_PROXY: "https://user:drevi-test-secret@proxy.invalid",
+    SSH_AUTH_SOCK: "/tmp/drevi-test-agent.sock",
     BASH_ENV: shellStartup,
     ENV: shellStartup,
     NODE_OPTIONS: `--require=${nodeStartup}`,

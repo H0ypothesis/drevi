@@ -215,7 +215,7 @@ final class CuaPreviewController: NSObject, NSWindowDelegate, URLSessionDataDele
         panel = CuaPreviewPanel(contentRect: NSRect(x: visible.maxX - 304, y: visible.minY + 24, width: 280, height: 175),
             styleMask: [.borderless, .resizable, .nonactivatingPanel], backing: .buffered, defer: false)
         super.init()
-        panel.title = "Panel · 电脑操作预览"
+        panel.title = "Drevi · 电脑操作预览"
         panel.level = .floating
         panel.isFloatingPanel = true
         panel.hidesOnDeactivate = false
@@ -228,7 +228,7 @@ final class CuaPreviewController: NSObject, NSWindowDelegate, URLSessionDataDele
         panel.maxSize = NSSize(width: 560, height: 350)
         panel.contentAspectRatio = NSSize(width: 8, height: 5)
         panel.delegate = self
-        panel.setFrameAutosaveName("PanelComputerUsePreviewCompact")
+        panel.setFrameAutosaveName("DreviComputerUsePreviewCompact")
         makeContent()
     }
 
@@ -350,7 +350,7 @@ final class CuaPreviewController: NSObject, NSWindowDelegate, URLSessionDataDele
             eventURL = components.url
             reconnect()
         }
-        // orderFront does not activate Panel or take keyboard focus.
+        // orderFront does not activate Drevi or take keyboard focus.
         panel.orderFront(nil)
     }
 
@@ -635,7 +635,7 @@ final class CuaPreviewController: NSObject, NSWindowDelegate, URLSessionDataDele
     private func startCapture() {
         guard let target = target else { return }
         guard CGPreflightScreenCaptureAccess() else {
-            placeholder.stringValue = "实时窗口预览需要允许 Panel 录制屏幕。\n已有的 CUA 操作权限属于 Cua Driver。"
+            placeholder.stringValue = "实时窗口预览需要允许 Drevi 录制屏幕。\n已有的 CUA 操作权限属于 Cua Driver。"
             permission.isHidden = false
             updateControls()
             return
@@ -649,7 +649,7 @@ final class CuaPreviewController: NSObject, NSWindowDelegate, URLSessionDataDele
                 let content = try await SCShareableContent.excludingDesktopWindows(true, onScreenWindowsOnly: false)
                 guard self.epoch == generation, !Task.isCancelled else { return }
                 guard let window = content.windows.first(where: { $0.windowID == target.windowID && $0.owningApplication?.processID == target.pid }) else {
-                    throw NSError(domain: "PanelPreview", code: 1, userInfo: [NSLocalizedDescriptionKey: "目标窗口已关闭或不再属于当前应用。"])
+                    throw NSError(domain: "DreviPreview", code: 1, userInfo: [NSLocalizedDescriptionKey: "目标窗口已关闭或不再属于当前应用。"])
                 }
                 let config = SCStreamConfiguration()
                 let scale = min(2, 1280 / max(1, window.frame.width), 960 / max(1, window.frame.height))

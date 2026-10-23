@@ -60,7 +60,7 @@ async function fixture(
   responses: FauxResponseStep[] = [fauxAssistantMessage("完成")],
 ) {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-temporary-directory-")),
+    await mkdtemp(join(tmpdir(), "drevi-temporary-directory-")),
   );
   const dataDirectory = join(directory, "state");
   const store = new Store(dataDirectory);

@@ -444,7 +444,7 @@ export class ModelProviderSettings {
               : "fallback") as ContextWindowSource,
         };
       });
-      const preferred = process.env.PANEL_DEFAULT_MODEL?.trim();
+      const preferred = process.env.DREVI_DEFAULT_MODEL?.trim();
       const envModel = preferred?.startsWith(`${definition.id}/`)
         ? preferred.slice(definition.id.length + 1)
         : undefined;

@@ -89,12 +89,12 @@ export function computerUseTargetLabel(call: ToolCall): string | undefined {
       : undefined;
 }
 
-/** Persisted tool images are served by Panel, never by a tool-supplied origin. */
+/** Persisted tool images are served by Drevi, never by a tool-supplied origin. */
 export function toolImageUrl(value: string): string | null {
   if (!value.startsWith("/api/") || value.includes("\\")) return null;
   try {
-    const url = new URL(value, "https://panel.invalid");
-    return url.origin === "https://panel.invalid" &&
+    const url = new URL(value, "https://drevi.invalid");
+    return url.origin === "https://drevi.invalid" &&
       /^\/api\/workspaces\/[^/]+\/nodes\/[^/]+\/tool-images\/[^/]+\/\d+$/.test(
         url.pathname,
       ) &&

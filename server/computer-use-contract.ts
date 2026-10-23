@@ -278,7 +278,7 @@ export function createComputerToolContract(
       const validation = validators[index](parameters);
       if (!validation.valid)
         throw new Error(
-          `computer_use_call 参数不符合 ${tool.name} 的 Panel 调用格式：${validation.errorMessage}。请对照 computer_use_tools 返回的完整 inputSchema 重试。本次未占用目标、未审批、未执行。`,
+          `computer_use_call 参数不符合 ${tool.name} 的 Drevi 调用格式：${validation.errorMessage}。请对照 computer_use_tools 返回的完整 inputSchema 重试。本次未占用目标、未审批、未执行。`,
         );
     },
   };

@@ -23,7 +23,7 @@ import {
 } from "../shared/subagent-settings.ts";
 
 export const SUBAGENT_PROMPT = `
-Panel 允许你根据当前用户任务自主调用 subagent 分配独立子任务。先用 action=list,capabilities=true 读取原生角色；执行时省略 action。agent/task 委派一个子代理；workflowScript 使用 runs.run/runs.all 串联或并行；tasks 是保留的批量简写。async:true 后台运行，async:false 等待结果。需要父上下文时显式 context:fork；独立审查通常用 fresh。可通过 status、steer（mode:steer/follow_up）、interrupt、stop、resume 管理精确 run id；需要时用 action:guide 阅读原生参数。隔离并发写入用 worktree:true。后台完成与监督者消息显示在右侧 Subagents；主任务已结束后可在右侧控制或恢复，不要声称后台结果已经完成。子代理工具遵守角色配置并通过 Panel 审批。外部 CLI 与远端调用按整个委派审批，由各自运行环境执行工具。用户选择 @subagents 时本轮必须开启并按任务调用；历史选择不要求重复委派。\n${SUBAGENT_DELIVERY_PROMPT}`;
+Drevi 允许你根据当前用户任务自主调用 subagent 分配独立子任务。先用 action=list,capabilities=true 读取原生角色；执行时省略 action。agent/task 委派一个子代理；workflowScript 使用 runs.run/runs.all 串联或并行；tasks 是保留的批量简写。async:true 后台运行，async:false 等待结果。需要父上下文时显式 context:fork；独立审查通常用 fresh。可通过 status、steer（mode:steer/follow_up）、interrupt、stop、resume 管理精确 run id；需要时用 action:guide 阅读原生参数。隔离并发写入用 worktree:true。后台完成与监督者消息显示在右侧 Subagents；主任务已结束后可在右侧控制或恢复，不要声称后台结果已经完成。子代理工具遵守角色配置并通过 Drevi 审批。外部 CLI 与远端调用按整个委派审批，由各自运行环境执行工具。用户选择 @subagents 时本轮必须开启并按任务调用；历史选择不要求重复委派。\n${SUBAGENT_DELIVERY_PROMPT}`;
 
 const taskSchema = Type.Object({
   agent: Type.String({
@@ -121,7 +121,7 @@ export class Subagents {
       {
         name: "subagent",
         label: "子代理协作",
-        description: `使用 nicobailon/pi-subagents 原生角色和独立 Pi 会话。先用 action=list 发现内置、用户和项目角色。角色决定提示词、工具、模型和技能；未配置模型时继承当前模型。用 agent/task 或 tasks 委派，每批最多 ${MAX_SUBAGENT_BATCH_SIZE} 个，最多 ${this.concurrency} 个同时执行。调用等待所有结果；共享工作目录及 Panel 审批。`,
+        description: `使用 nicobailon/pi-subagents 原生角色和独立 Pi 会话。先用 action=list 发现内置、用户和项目角色。角色决定提示词、工具、模型和技能；未配置模型时继承当前模型。用 agent/task 或 tasks 委派，每批最多 ${MAX_SUBAGENT_BATCH_SIZE} 个，最多 ${this.concurrency} 个同时执行。调用等待所有结果；共享工作目录及 Drevi 审批。`,
         parameters: Type.Object({
           action: Type.Optional(
             Type.Union([Type.Literal("list"), Type.Literal("run")]),
@@ -389,7 +389,7 @@ export class Subagents {
                     modelScope: found.modelScope,
                     preferredModelProvider: this.options.model.split("/")[0],
                     // Upstream's automatic output fallback writes directly to
-                    // disk. Persist through Panel's audited write boundary below.
+                    // disk. Persist through Drevi's audited write boundary below.
                     outputMode: "inline",
                     structuredOutput,
                     skills: plan.skillNames,

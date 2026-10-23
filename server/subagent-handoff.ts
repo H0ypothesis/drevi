@@ -9,13 +9,13 @@ import type {
   UserMessage,
 } from "@earendil-works/pi-ai";
 
-type SubagentNoticeMessage = UserMessage & { panelSubagentNotice: true };
+type SubagentNoticeMessage = UserMessage & { dreviSubagentNotice: true };
 export function subagentNoticeMessage(content: string): SubagentNoticeMessage {
   return {
     role: "user",
     content,
     timestamp: Date.now(),
-    panelSubagentNotice: true,
+    dreviSubagentNotice: true,
   };
 }
 
@@ -132,8 +132,10 @@ export function createSubagentHandoff(options: {
       signal.throwIfAborted();
       const notice =
         message.role === "user" &&
-        (message as Partial<SubagentNoticeMessage>).panelSubagentNotice ===
-          true;
+        ((message as Partial<SubagentNoticeMessage>).dreviSubagentNotice ===
+          true ||
+          (message as UserMessage & { panelSubagentNotice?: boolean })
+            .panelSubagentNotice === true);
       if (
         !notice &&
         (message.role !== "toolResult" ||

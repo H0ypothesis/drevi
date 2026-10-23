@@ -48,7 +48,7 @@ test("archive verification refuses truncation and tampering before extraction", 
 });
 
 test("bad download is cleaned up without installing or launching a driver", async () => {
-  const root = await mkdtemp(join(tmpdir(), "panel-cua-setup-test-"));
+  const root = await mkdtemp(join(tmpdir(), "drevi-cua-setup-test-"));
   try {
     await assert.rejects(
       setupCua({
@@ -60,7 +60,7 @@ test("bad download is cleaned up without installing or launching a driver", asyn
       /size/,
     );
     assert.deepEqual(
-      await readdir(join(root, ".panel/cua-driver", release.version)),
+      await readdir(join(root, ".drevi/cua-driver", release.version)),
       [],
     );
   } finally {

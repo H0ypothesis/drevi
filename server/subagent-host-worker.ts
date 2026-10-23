@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { randomUUID } from "node:crypto";
 import { Type } from "typebox";
 import { loadNicobailon } from "./nicobailon-loader.ts";
-import panelHostChildFactory, {
+import dreviHostChildFactory, {
   bridgeProviders,
   hostBridgeConfig,
 } from "./subagent-host-factory.ts";
@@ -14,7 +14,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 const config = await hostBridgeConfig();
 const engine = await loadNicobailon();
 const sdk = engine.piSdk;
-const factory = panelHostChildFactory();
+const factory = dreviHostChildFactory();
 engine.setChildSessionFactory(factory);
 engine.setChildSessionFactoryModule(
   fileURLToPath(
@@ -130,7 +130,7 @@ const loader = new sdk.DefaultResourceLoader({
             pi.registerTool(tool);
           },
           sendMessage(message, options) {
-            pi.appendEntry("panel-subagents-notification", message);
+            pi.appendEntry("drevi-subagents-notification", message);
             notify("message", { message, options });
           },
           sendUserMessage(content, options) {
@@ -186,7 +186,7 @@ const historyMarker = manager
   .getEntries()
   .findLast(
     (entry) =>
-      entry.type === "custom" && entry.customType === "panel-parent-history",
+      entry.type === "custom" && entry.customType === "drevi-parent-history",
   );
 let historyLength =
   historyMarker?.type === "custom"
@@ -228,7 +228,7 @@ process.on("message", async (raw) => {
       for (const item of message.history.slice(historyLength))
         manager.appendMessage(item);
       historyLength = message.history.length;
-      manager.appendCustomEntry("panel-parent-history", {
+      manager.appendCustomEntry("drevi-parent-history", {
         length: historyLength,
       });
     }

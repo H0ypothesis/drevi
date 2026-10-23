@@ -1,0 +1,27 @@
+export function Dreamcatcher({ size = 32 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true">
+      <rect width="40" height="40" rx="11" fill="var(--logo-background)" />
+      <g stroke="var(--logo-foreground)" fill="var(--logo-foreground)">
+        <circle cx="20" cy="15" r="10" fill="none" strokeWidth="1.5" />
+        <path
+          d="M20.00 5.00L22.03 10.10 27.07 7.93 M22.03 10.10L24.90 12.97 M27.07 7.93L24.90 12.97 30.00 15.00 M24.90 12.97L24.90 17.03 M30.00 15.00L24.90 17.03 27.07 22.07 M24.90 17.03L22.03 19.90 M27.07 22.07L22.03 19.90 20.00 25.00 M22.03 19.90L17.97 19.90 M20.00 25.00L17.97 19.90 12.93 22.07 M17.97 19.90L15.10 17.03 M12.93 22.07L15.10 17.03 10.00 15.00 M15.10 17.03L15.10 12.97 M10.00 15.00L15.10 12.97 12.93 7.93 M15.10 12.97L17.97 10.10 M12.93 7.93L17.97 10.10 20.00 5.00 M17.97 10.10L22.03 10.10"
+          fill="none"
+          strokeWidth=".8"
+          strokeLinejoin="round"
+        />
+        <circle cx="20" cy="15" r="1.2" stroke="none" />
+        <path
+          d="M14 23.2V28M20 25V31M26 23.2V28"
+          fill="none"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+        />
+        <path
+          d="M14 27C10.5 28.5 12 31.5 14 33C16 31.5 17.5 28.5 14 27ZM20 30C16.5 31.5 18 34.5 20 36C22 34.5 23.5 31.5 20 30ZM26 27C22.5 28.5 24 31.5 26 33C28 31.5 29.5 28.5 26 27Z"
+          stroke="none"
+        />
+      </g>
+    </svg>
+  );
+}

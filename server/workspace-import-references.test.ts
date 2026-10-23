@@ -76,7 +76,7 @@ test("imports reference snapshots and remaps existing sources consistently acros
   assert.match(context, /提交时的旧版回答/);
   assert.doesNotMatch(context, /改写后的新方案/);
 
-  const store = new Store("/tmp/panel-reference-import-snapshot-only");
+  const store = new Store("/tmp/drevi-reference-import-snapshot-only");
   store.data.workspaces.push(imported);
   assert.deepEqual(
     store.snapshot().workspaces[0].nodes[2].contextReferences,

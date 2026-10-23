@@ -17,7 +17,7 @@ export interface DesktopUpdateState {
   operation?: "check" | "install";
 }
 
-export interface PanelDesktop {
+export interface DreviDesktop {
   readonly platform: "macos";
   readonly fullscreen: boolean;
   chooseDirectory: () => Promise<string | null>;
@@ -39,12 +39,12 @@ export interface PanelDesktop {
 
 declare global {
   interface Window {
-    panelDesktop?: PanelDesktop;
+    dreviDesktop?: DreviDesktop;
   }
 }
 
-export function getDesktopBridge(): PanelDesktop | null {
-  return window.panelDesktop?.platform === "macos" ? window.panelDesktop : null;
+export function getDesktopBridge(): DreviDesktop | null {
+  return window.dreviDesktop?.platform === "macos" ? window.dreviDesktop : null;
 }
 
 export function onDesktopAction(handle: (action: DesktopAction) => void) {
@@ -54,6 +54,6 @@ export function onDesktopAction(handle: (action: DesktopAction) => void) {
     const action = event.detail?.action;
     if (action === "new-workspace" || action === "search") handle(action);
   };
-  window.addEventListener("panel:native-action", listener);
-  return () => window.removeEventListener("panel:native-action", listener);
+  window.addEventListener("drevi:native-action", listener);
+  return () => window.removeEventListener("drevi:native-action", listener);
 }

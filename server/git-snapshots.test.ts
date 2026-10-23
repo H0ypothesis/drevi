@@ -36,7 +36,7 @@ async function git(args: string[]) {
 
 async function fixture(t: TestContext) {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-git-snapshots-")),
+    await mkdtemp(join(tmpdir(), "drevi-git-snapshots-")),
   );
   t.after(() => rm(directory, { recursive: true, force: true }));
   const cwd = join(directory, "work");
@@ -154,10 +154,10 @@ test("already dirty files have an exact baseline without modifying user HEAD or 
 
 test("ignores dependencies, nested Git internals and service data, preserving symlinks without following them", async (t) => {
   const { directory, cwd } = await fixture(t);
-  const data = join(cwd, ".panel");
+  const data = join(cwd, ".drevi");
   const snapshots = new GitSnapshots(data);
   await writeFile(join(cwd, ".gitignore"), "ignored/\n*.secret\n");
-  for (const path of ["ignored", "node_modules", "nested/.git", ".panel"]) {
+  for (const path of ["ignored", "node_modules", "nested/.git", ".drevi"]) {
     await mkdir(join(cwd, path), { recursive: true });
     await writeFile(join(cwd, path, "excluded.txt"), "excluded content");
   }

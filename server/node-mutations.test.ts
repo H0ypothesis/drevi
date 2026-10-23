@@ -75,7 +75,7 @@ async function until(check: () => boolean) {
 }
 
 async function setup(t: TestContext, concurrency = 2) {
-  const directory = await mkdtemp(join(tmpdir(), "panel-node-mutations-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-node-mutations-"));
   const store = new Store(directory);
   await store.init(false);
   const workspace: StoredWorkspace = createWorkspace("Topic", "Background");

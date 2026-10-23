@@ -43,7 +43,7 @@ async function until(predicate: () => boolean) {
 
 async function fixture(t: TestContext, approvalMode: "auto" | "ask" = "auto") {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-cua-scheduler-")),
+    await mkdtemp(join(tmpdir(), "drevi-cua-scheduler-")),
   );
   const project = join(directory, "project");
   await mkdir(project);

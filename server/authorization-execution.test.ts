@@ -41,7 +41,7 @@ function deferred<T>() {
 
 async function fixture(t: TestContext) {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-authorization-execution-")),
+    await mkdtemp(join(tmpdir(), "drevi-authorization-execution-")),
   );
   const project = join(directory, "project");
   await mkdir(project);

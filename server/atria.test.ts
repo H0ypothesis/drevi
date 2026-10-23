@@ -10,13 +10,13 @@ const envNames = [
   "ATRIA_API_KEY",
   "ATRIA_BASE_URL",
   "ATRIA_MODEL",
-  "PANEL_DEFAULT_MODEL",
+  "DREVI_DEFAULT_MODEL",
 ] as const;
 
 test("Atria streams Dawn Preview with Messages routing and server-side API key auth", async (t) => {
   const modelId = "Atria-Dawn-Preview";
   const configId = `atria/${modelId}`;
-  const dummyKey = "atr_panel-local-mock-key";
+  const dummyKey = "atr_drevi-local-mock-key";
   const previousEnv = new Map(
     envNames.map((name) => [name, process.env[name]]),
   );
@@ -111,7 +111,7 @@ test("Atria streams Dawn Preview with Messages routing and server-side API key a
   process.env.ATRIA_API_KEY = dummyKey;
   process.env.ATRIA_BASE_URL = `${origin}/`;
   delete process.env.ATRIA_MODEL;
-  process.env.PANEL_DEFAULT_MODEL = "paperbypass/openai/gpt-5.6-luna-pro";
+  process.env.DREVI_DEFAULT_MODEL = "paperbypass/openai/gpt-5.6-luna-pro";
 
   const runtime = new PiRuntime();
   const models = runtime.models();
@@ -122,7 +122,7 @@ test("Atria streams Dawn Preview with Messages routing and server-side API key a
   assert.equal(model.envVar, "ATRIA_API_KEY");
   assert.deepEqual(model.thinkingLevels, ["off"]);
   assert.equal(
-    models.find((item) => item.id === process.env.PANEL_DEFAULT_MODEL)?.default,
+    models.find((item) => item.id === process.env.DREVI_DEFAULT_MODEL)?.default,
     true,
   );
   assert.equal(JSON.stringify(models).includes(dummyKey), false);

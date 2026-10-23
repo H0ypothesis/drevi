@@ -42,7 +42,7 @@ async function settled<T>(run: () => Promise<T>): Promise<T> {
 }
 
 async function fixture(t: TestContext) {
-  const directory = await mkdtemp(join(tmpdir(), "panel-tool-requests-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-tool-requests-"));
   const store = new Store(directory);
   await store.init(false);
   const workspace = createWorkspace("Explicit tool selection", "Test");

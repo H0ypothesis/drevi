@@ -30,7 +30,7 @@ function scriptedChild(
     return {
       sessionId: id,
       sessionFile: undefined,
-      modelId: "panel-test",
+      modelId: "drevi-test",
       messages,
       subscribe(listener) {
         listeners.add(listener);
@@ -104,7 +104,7 @@ for (const concurrency of [undefined, 1, 2, 6, 8]) {
     const service = new Subagents({
       maxConcurrentSubagents: concurrency,
       cwd: process.cwd(),
-      model: "openai/panel-test",
+      model: "openai/drevi-test",
       thinking: "off",
       signal: new AbortController().signal,
       onUpdate: (run) => updates.set(run.id, run),
@@ -156,7 +156,7 @@ test("cancellation settles both active and queued children and waits for their c
   let started = 0;
   const service = new Subagents({
     cwd: process.cwd(),
-    model: "openai/panel-test",
+    model: "openai/drevi-test",
     thinking: "off",
     signal: controller.signal,
     onUpdate: (run) => updates.set(run.id, run),

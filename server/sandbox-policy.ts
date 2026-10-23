@@ -4,7 +4,7 @@ import { realpathSync } from "node:fs";
 import { basename, isAbsolute, join, relative, resolve, sep } from "node:path";
 import type { SandboxRuntimeConfig } from "@anthropic-ai/sandbox-runtime";
 
-export const SANDBOX_POLICY_VERSION = "panel-sandbox-v1";
+export const SANDBOX_POLICY_VERSION = "drevi-sandbox-v1";
 export const SANDBOX_TOOL_NAMES = new Set(["read", "write", "edit", "bash"]);
 
 export interface SandboxScope {
@@ -33,7 +33,7 @@ function workspaceStorageException(root: string, path: string) {
 }
 
 function storageDirectory() {
-  const path = resolve(process.env.PANEL_DATA_DIR ?? ".panel");
+  const path = resolve(process.env.DREVI_DATA_DIR ?? ".drevi");
   try {
     return realpathSync(path);
   } catch {
@@ -45,7 +45,7 @@ export function assertSandboxWorkspace(root: string) {
   for (const denied of protectedPaths(root)) {
     if (workspaceStorageException(root, denied)) continue;
     if (contains(denied, root))
-      throw new Error("凭证或 Panel 状态目录不能作为编码工作目录。");
+      throw new Error("凭证或 Drevi 状态目录不能作为编码工作目录。");
   }
 }
 
@@ -66,7 +66,7 @@ export function protectedPaths(root: string) {
     "Library/Keychains",
   ]
     .map((path) => join(homedir(), path))
-    .concat([storageDirectory(), join(root, ".panel")]);
+    .concat([storageDirectory(), join(root, ".drevi"), join(root, ".panel")]);
 }
 
 export function assertSandboxFilePath(
@@ -87,7 +87,7 @@ export function assertSandboxFilePath(
       rel === "" ||
       (!rel.startsWith(`..${sep}`) && rel !== ".." && !isAbsolute(rel))
     )
-      throw new Error("沙盒禁止访问 Panel 状态或凭证目录。");
+      throw new Error("沙盒禁止访问 Drevi 状态或凭证目录。");
   }
   const artifact = [".pi/subagents/artifacts", ".pi/subagents/handoffs"].some(
     (directory) => contains(join(root, directory), path),
@@ -128,7 +128,9 @@ export async function sandboxConfig(
       if (isCredentialName(entry.name)) credentials.push(path);
       else if (
         entry.isDirectory() &&
-        !["node_modules", ".git", ".panel", ".pi"].includes(entry.name)
+        !["node_modules", ".git", ".drevi", ".panel", ".pi"].includes(
+          entry.name,
+        )
       )
         pending.push(path);
     }

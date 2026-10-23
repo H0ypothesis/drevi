@@ -17,7 +17,7 @@ test("native web session environment excludes unrelated provider keys, cookies a
     process.env.PI_ALLOW_BROWSER_COOKIES = "1";
     process.env.NODE_OPTIONS = "--inspect";
     process.env.HTTPS_PROXY = "http://proxy.invalid";
-    const environment = piWebEnvironment("/tmp/panel-test-config");
+    const environment = piWebEnvironment("/tmp/drevi-test-config");
     assert.equal(environment.EXA_API_KEY, "exa-test-key");
     for (const key of [
       "GEMINI_API_KEY",
@@ -26,8 +26,8 @@ test("native web session environment excludes unrelated provider keys, cookies a
       "HTTPS_PROXY",
     ])
       assert.equal(environment[key], undefined);
-    assert.equal(environment.HOME, "/tmp/panel-test-config");
-    assert.equal(environment.PI_CODING_AGENT_DIR, "/tmp/panel-test-config");
+    assert.equal(environment.HOME, "/tmp/drevi-test-config");
+    assert.equal(environment.PI_CODING_AGENT_DIR, "/tmp/drevi-test-config");
   } finally {
     for (const key of Object.keys(process.env))
       if (!(key in original)) delete process.env[key];
@@ -52,7 +52,7 @@ test("nonpublic URLs fail before starting the native worker", async () => {
 
 test("server shutdown closes native workers and removes their session caches", async () => {
   const directory = await mkdtemp(
-    join(tmpdir(), "panel-native-shutdown-test-"),
+    join(tmpdir(), "drevi-native-shutdown-test-"),
   );
   const original = process.env.TMPDIR;
   process.env.TMPDIR = directory;
@@ -67,7 +67,7 @@ test("server shutdown closes native workers and removes their session caches", a
     );
     assert.ok(
       (await readdir(directory)).some((name) =>
-        name.startsWith("panel-native-web-"),
+        name.startsWith("drevi-native-web-"),
       ),
     );
     await closeNativeWebSessions();

@@ -16,7 +16,7 @@ const base = {
   model: "test-model",
 };
 async function fixture(t: TestContext, thinking?: ModelThinkingSettings) {
-  const directory = await mkdtemp(join(tmpdir(), "panel-controls-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-controls-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const settings = new ModelProviderSettings(directory);
   await settings.init();
@@ -334,8 +334,8 @@ test("probe uses fixed content, bounded requests and negative controls through t
       assert.equal(body.tools, undefined);
       assert.match(JSON.stringify(body.messages), /Calculate 17 \* 19/);
       const rejected =
-        body.thinking?.type === "panel_invalid_probe_value" ||
-        body.reasoning_effort === "panel_invalid_probe_value" ||
+        body.thinking?.type === "drevi_invalid_probe_value" ||
+        body.reasoning_effort === "drevi_invalid_probe_value" ||
         body.reasoning_effort === "max";
       return rejected
         ? new Response(

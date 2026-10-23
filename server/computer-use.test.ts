@@ -786,7 +786,7 @@ test("different pages perform CDP actions concurrently on the shared transport",
   await Promise.all([first, second]);
 });
 
-test("Panel injects exact target and session routing and rejects caller routing/output overrides", async (t) => {
+test("Drevi injects exact target and session routing and rejects caller routing/output overrides", async (t) => {
   const { driver, run } = fixture(t);
   const a = run();
   await invoke(a, { tool: "get_window_state", target: windowTarget(2) });

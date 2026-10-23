@@ -69,7 +69,7 @@ async function mount(t, { desktop, fetchFiles } = {}) {
   window.HTMLDialogElement.prototype.close = function () {
     this.removeAttribute("open");
   };
-  if (desktop) window.panelDesktop = { platform: "macos", ...desktop };
+  if (desktop) window.dreviDesktop = { platform: "macos", ...desktop };
   const requests = [];
   let files = [htmlFile];
   window.fetch = async (url, options) => {

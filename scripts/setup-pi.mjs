@@ -20,7 +20,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export function setupPi({
   sourcePackage = join(root, "pi/packages/ai"),
   releasePackage = dirname(
-    dirname(fileURLToPath(import.meta.resolve("@panel/pi-model-data"))),
+    dirname(fileURLToPath(import.meta.resolve("@drevi/pi-model-data"))),
   ),
 } = {}) {
   const source = JSON.parse(
@@ -35,13 +35,13 @@ export function setupPi({
     release.version !== source.version
   ) {
     throw new Error(
-      `Pi source (${source.name}@${source.version}) and model data (${release.name}@${release.version}) must match. Update @panel/pi-model-data with the Pi submodule, then run npm install --ignore-scripts.`,
+      `Pi source (${source.name}@${source.version}) and model data (${release.name}@${release.version}) must match. Update @drevi/pi-model-data with the Pi submodule, then run npm install --ignore-scripts.`,
     );
   }
 
   const providers = join(sourcePackage, "src/providers");
   // Keep staging on the destination filesystem for atomic directory renames.
-  const staging = mkdtempSync(join(providers, ".panel-model-data-"));
+  const staging = mkdtempSync(join(providers, ".drevi-model-data-"));
   const stagedProviders = join(staging, "src/providers");
   const stagedData = join(stagedProviders, "data");
   const destination = join(providers, "data");

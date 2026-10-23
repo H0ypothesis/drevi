@@ -1,5 +1,5 @@
 import {
-  createPanelChildSession,
+  createDreviChildSession,
   persistSubagentOutput,
 } from "./subagent-session.ts";
 import {
@@ -683,7 +683,7 @@ export class PiRuntime implements Runtime {
           demo: false,
           default:
             `${model.provider}/${model.id}` ===
-            process.env.PANEL_DEFAULT_MODEL?.trim(),
+            process.env.DREVI_DEFAULT_MODEL?.trim(),
           thinkingLevels: getSupportedThinkingLevels(model),
           thinkingControls: modelThinkingControls(model),
           contextWindow: model.contextWindow,
@@ -822,7 +822,7 @@ export class PiRuntime implements Runtime {
               persistSubagentOutput(execution, id, path, content, childSignal),
             createChildSession: (id, launch, skillPaths) => {
               const childWebTools = newWebTools();
-              return createPanelChildSession(launch, {
+              return createDreviChildSession(launch, {
                 id,
                 skillPaths,
                 providers: {
@@ -873,7 +873,7 @@ export class PiRuntime implements Runtime {
       (execution ? `\n${WEB_RESEARCH_PROMPT}` : "") +
       (computerRun ? COMPUTER_USE_PROMPT : "") +
       (requestedTools?.length
-        ? "\nPanel 会按本条用户消息的 @ 选择先发起对应工具调用。已完成的工具结果就是实际调用记录，请基于结果继续；无需为满足 @ 选择而重复相同调用。被拒绝或失败的调用不能假定成功。"
+        ? "\nDrevi 会按本条用户消息的 @ 选择先发起对应工具调用。已完成的工具结果就是实际调用记录，请基于结果继续；无需为满足 @ 选择而重复相同调用。被拒绝或失败的调用不能假定成功。"
         : "") +
       branchContextDescription(contextOptions);
     const maxOutputTokens = outputTokenBudget(model);
@@ -1092,7 +1092,7 @@ export class PiRuntime implements Runtime {
             signal.throwIfAborted();
             if (
               bootstrapCuaDenied &&
-              toolCall.id.startsWith("panel-intent-") &&
+              /^(?:drevi|panel)-intent-/.test(toolCall.id) &&
               toolCall.name === "computer_use_call"
             )
               return {
@@ -1128,7 +1128,7 @@ export class PiRuntime implements Runtime {
             if (
               !allowed &&
               call.name === "computer_use_tools" &&
-              call.id.startsWith("panel-intent-")
+              /^(?:drevi|panel)-intent-/.test(call.id)
             )
               bootstrapCuaDenied = true;
             signal.throwIfAborted();
@@ -1151,7 +1151,10 @@ export class PiRuntime implements Runtime {
         if (
           message.diagnostics?.some(
             (diagnostic) =>
-              diagnostic.type === "panel_tool_request_bootstrap" &&
+              [
+                "drevi_tool_request_bootstrap",
+                "panel_tool_request_bootstrap",
+              ].includes(diagnostic.type) &&
               diagnostic.details?.source === "user_tool_selection",
           )
         )

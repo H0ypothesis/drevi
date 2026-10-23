@@ -32,7 +32,7 @@ async function requireCardReferences() {
     capabilities.cardReferences !== true
   ) {
     throw new Error(
-      "当前后端尚未加载卡片引用功能，请重启 Panel 服务后重试。引用内容尚未发送。",
+      "当前后端尚未加载卡片引用功能，请重启 Drevi 服务后重试。引用内容尚未发送。",
     );
   }
 }
@@ -55,7 +55,7 @@ async function requireToolRequests() {
     capabilities.toolRequests !== true
   )
     throw new Error(
-      "当前后端尚未加载指定工具功能，请重启 Panel 服务后重试。消息尚未发送。",
+      "当前后端尚未加载指定工具功能，请重启 Drevi 服务后重试。消息尚未发送。",
     );
 }
 
@@ -77,7 +77,7 @@ async function requireLongTasks() {
     capabilities.longTasks !== true
   )
     throw new Error(
-      "当前后端尚不支持长程任务，请更新并重启 Panel 服务或桌面应用后重试。消息尚未发送。",
+      "当前后端尚不支持长程任务，请更新并重启 Drevi 服务或桌面应用后重试。消息尚未发送。",
     );
 }
 
@@ -99,7 +99,7 @@ async function requireComputerUseTakeover(taskControl = false) {
     capabilities.computerUseTakeover !== true
   )
     throw new Error(
-      "当前后端尚不支持 CUA 接管，请更新并重启 Panel 服务或桌面应用后重试。开关尚未更改。",
+      "当前后端尚不支持 CUA 接管，请更新并重启 Drevi 服务或桌面应用后重试。开关尚未更改。",
     );
   if (
     taskControl &&
@@ -107,7 +107,7 @@ async function requireComputerUseTakeover(taskControl = false) {
       capabilities.computerUseTaskControl !== true)
   )
     throw new Error(
-      "当前后端尚不支持本任务控制，请更新并重启 Panel 服务或桌面应用后重试。授权尚未更改。",
+      "当前后端尚不支持本任务控制，请更新并重启 Drevi 服务或桌面应用后重试。授权尚未更改。",
     );
 }
 
@@ -127,11 +127,11 @@ async function requireBranchMerging(preparation = false) {
   }
   if (capabilities?.branchMerging !== true)
     throw new Error(
-      "当前后端尚未加载多分支融合功能，请重启 Panel 服务后重试。问题尚未发送。",
+      "当前后端尚未加载多分支融合功能，请重启 Drevi 服务后重试。问题尚未发送。",
     );
   if (preparation && capabilities.mergeContextPreparation !== true)
     throw new Error(
-      "当前后端尚未加载整体主动压缩功能，请重启 Panel 服务后重试。问题尚未发送。",
+      "当前后端尚未加载整体主动压缩功能，请重启 Drevi 服务后重试。问题尚未发送。",
     );
 }
 
@@ -166,7 +166,7 @@ export async function api<T>(
     }
     if (capabilities?.runInputs !== true)
       throw new Error(
-        "当前后端尚不支持运行中引导，请更新并重启 Panel 服务或桌面应用后重试。消息尚未发送。",
+        "当前后端尚不支持运行中引导，请更新并重启 Drevi 服务或桌面应用后重试。消息尚未发送。",
       );
   }
   const usesMergedCheckpoint = !!(
@@ -245,14 +245,17 @@ export async function api<T>(
 
 export function readPreference(key: string): string | null {
   try {
-    return localStorage.getItem(`panel:${key}`);
+    return (
+      localStorage.getItem(`drevi:${key}`) ??
+      localStorage.getItem(`panel:${key}`)
+    );
   } catch {
     return null;
   }
 }
 export function savePreference(key: string, value: string) {
   try {
-    localStorage.setItem(`panel:${key}`, value);
+    localStorage.setItem(`drevi:${key}`, value);
   } catch {
     /* Persistence may be disabled by the browser. */
   }

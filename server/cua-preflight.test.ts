@@ -100,7 +100,7 @@ async function until(check: () => boolean) {
 }
 
 async function fixture(t: TestContext, mode: "auto" | "ask", args: JsonObject) {
-  const directory = await mkdtemp(join(tmpdir(), "panel-cua-preflight-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-cua-preflight-"));
   const store = new Store(directory);
   await store.init(false);
   const workspace = createWorkspace("Preflight", "Validate before approval");

@@ -52,7 +52,7 @@ for (const cancelled of [undefined, null, "", "   "]) {
       constructor() { super(); channels.push(this); }
     };
     let finish;
-    window.panelDesktop = {
+    window.dreviDesktop = {
       platform: "macos",
       chooseDirectory: () => new Promise(resolve => { finish = resolve; }),
     };

@@ -56,7 +56,7 @@ const discovery = {
 // These are finite schema commands, not MCP/native actions. No daemon,
 // screenshots, app launches or macOS permissions are involved in this test.
 test(
-  "Panel routes every exposed tool against the staged official 0.30.4 schema",
+  "Drevi routes every exposed tool against the staged official 0.30.4 schema",
   {
     skip:
       !existsSync(binary) && "run npm run setup:cua to verify native schemas",
@@ -176,7 +176,7 @@ test(
         assert.equal(entry.callTool, "computer_use_call");
         assert.ok(
           entry.examples.length > 0,
-          `${entry.name} must show a full Panel example`,
+          `${entry.name} must show a full Drevi example`,
         );
         const validator = new AjvJsonSchemaValidator().getValidator(
           entry.inputSchema,

@@ -66,7 +66,7 @@ async function fixture(
   ],
   pluginResult?: PiWebResult,
 ) {
-  const directory = await mkdtemp(join(tmpdir(), "panel-web-execution-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-web-execution-"));
   const store = new Store(directory);
   await store.init(false);
   const workspace = createWorkspace("网页研究", "读取公开资料");

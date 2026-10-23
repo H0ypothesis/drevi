@@ -4,6 +4,7 @@ export function adaptNicobailonSource(path, source) {
     !path
       .replaceAll("\\", "/")
       .endsWith("pi-subagents/src/runs/shared/single-output.js") ||
+    source.includes("dreviProjectArtifactBase") ||
     source.includes("panelProjectArtifactBase")
   )
     return source;
@@ -14,7 +15,7 @@ export function adaptNicobailonSource(path, source) {
   return source.replace(
     signature,
     `${signature}
-    // panelProjectArtifactBase: only relocate the managed native namespace.
+    // dreviProjectArtifactBase: only relocate the managed native namespace.
     if (requestedCwd && runtimeCwd) {
         const childCwd = path.resolve(runtimeCwd, requestedCwd);
         const projectArtifacts = path.resolve(runtimeCwd, ".pi/subagents");

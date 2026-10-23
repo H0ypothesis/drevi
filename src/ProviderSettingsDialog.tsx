@@ -127,7 +127,7 @@ export function ProviderSettingsDialog({
             },
           );
           if (response.status === 404)
-            throw new Error("当前服务不支持获取模型列表，请更新并重启 Panel。");
+            throw new Error("当前服务不支持获取模型列表，请更新并重启 Drevi。");
           const result = await response.json();
           if (!response.ok)
             throw new Error(
@@ -238,9 +238,9 @@ export function ProviderSettingsDialog({
           "上下文长度必须是 1024 到 100000000 之间的整数（tokens）。",
         );
       if (contextWindow !== undefined && !settings.supportsContextWindow)
-        throw new Error("当前服务不支持设置上下文长度，请更新并重启 Panel。");
+        throw new Error("当前服务不支持设置上下文长度，请更新并重启 Drevi。");
       if (thinkingOverride !== undefined && !settings.thinkingFormats?.length)
-        throw new Error("当前服务不支持设置思考档位，请更新并重启 Panel。");
+        throw new Error("当前服务不支持设置思考档位，请更新并重启 Drevi。");
       if (
         thinkingOverride &&
         thinkingOverride.format !== "none" &&

@@ -54,7 +54,7 @@ function pdfFixture(pages = [["Native PDF streaming text"]]) {
 }
 
 before(async () => {
-  directory = await mkdtemp(join(tmpdir(), "panel-native-web-test-"));
+  directory = await mkdtemp(join(tmpdir(), "drevi-native-web-test-"));
   process.env.PI_CODING_AGENT_DIR = directory;
   process.env.TMPDIR = directory;
   delete process.env.EXA_API_KEY;
@@ -142,7 +142,7 @@ after(async () => {
   await rm(directory, { recursive: true, force: true });
 });
 
-test("Panel research contracts use the actual upstream tool names and parameter names", () => {
+test("Drevi research contracts use the actual upstream tool names and parameter names", () => {
   assert.deepEqual(
     [...host.tools.keys()].sort(),
     Object.keys(nativeWebSchemas).sort(),
@@ -153,6 +153,32 @@ test("Panel research contracts use the actual upstream tool names and parameter 
     };
     for (const property of Object.keys(schema.properties))
       assert.ok(property in native.properties, `${name}.${property}`);
+  }
+});
+
+test("native search and page extraction allow proxy Fake-IP preflight to reach the guarded transport", async () => {
+  const fakeDns = mock.method(dns, "lookup", async () => [
+    { address: "198.18.0.75", family: 4 },
+  ]);
+  syncBuiltinESMExports();
+  try {
+    const search = await host.execute({
+      name: "web_search",
+      args: { query: "proxy search", workflow: "none" },
+    });
+    assert.ok(
+      search.sources.some(
+        (source) => source.url === "https://example.com/docs",
+      ),
+    );
+    const page = await host.execute({
+      name: "fetch_content",
+      args: { url: "https://example.com/proxy-docs" },
+    });
+    assert.match(page.text, /API supports streaming responses/);
+  } finally {
+    fakeDns.mock.restore();
+    syncBuiltinESMExports();
   }
 });
 

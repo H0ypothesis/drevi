@@ -51,7 +51,7 @@ function fixture(t: TestContext, native = false) {
   let stops = 0;
   const entered: Array<{ path: string; body: unknown }> = [];
   if (native)
-    window.panelDesktop = {
+    window.dreviDesktop = {
       platform: "macos",
       setComputerUsePreview: async (task: unknown) => {
         opened.push(task);
@@ -198,7 +198,7 @@ test("browser preview follows task revisions, drops foreign frames and clears th
 test("compact controls enter the controlled target, reconnect and close without stopping; sizing keeps the video ratio", async (t) => {
   const f = fixture(t);
   f.window.focus = () => {
-    throw new Error("enter must not focus Panel");
+    throw new Error("enter must not focus Drevi");
   };
   await f.render();
   const picture = f.window.document.querySelector(
@@ -353,7 +353,7 @@ test("native preview passes task identifiers only and respects a user closing th
   await f.render({ ...node, id: "second" });
   assert.equal(f.closes, 1);
   await act(() =>
-    f.window.dispatchEvent(new f.window.CustomEvent("panel:preview-closed")),
+    f.window.dispatchEvent(new f.window.CustomEvent("drevi:preview-closed")),
   );
   assert.equal(f.closes, 2);
   await f.render({ ...node, id: "third" });

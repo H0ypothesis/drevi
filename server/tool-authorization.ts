@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { types } from "node:util";
 
-export const TOOL_POLICY_VERSION = "panel-tools-v8-sandbox-recovery";
+export const TOOL_POLICY_VERSION = "drevi-tools-v8-sandbox-recovery";
 
 export interface ToolAuthorizationScope {
   workspaceId: string;

@@ -23,7 +23,7 @@ const windowSchema: Tool = {
   },
 };
 
-test("discovery presents a complete Panel contract and leaves native schema intact", () => {
+test("discovery presents a complete Drevi contract and leaves native schema intact", () => {
   const original = structuredClone(windowSchema);
   const contract = createComputerToolContract(windowSchema, "window");
   const valid = {

@@ -148,7 +148,7 @@ async function afterRunSettles<T>(mutate: () => Promise<T>): Promise<T> {
   assert.fail("Timed out waiting for scheduler cleanup");
 }
 async function setup() {
-  const directory = await mkdtemp(join(tmpdir(), "panel-context-integration-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-context-integration-"));
   const store = new Store(directory);
   await store.init(false);
   const workspace = createWorkspace("Root", "Preserve root background");

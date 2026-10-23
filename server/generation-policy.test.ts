@@ -106,7 +106,7 @@ test("length stops continue in place and preserve every partial reply and origin
     fauxAssistantMessage("part one; ", { stopReason: "length" }),
     (context) => {
       assert.match(JSON.stringify(context), /part one/);
-      assert.match(JSON.stringify(context), /Panel 自动续写/);
+      assert.match(JSON.stringify(context), /Drevi 自动续写/);
       return fauxAssistantMessage("part two; ", { stopReason: "length" });
     },
     fauxAssistantMessage("complete"),

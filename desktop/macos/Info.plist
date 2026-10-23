@@ -3,14 +3,14 @@
 <plist version="1.0">
 <dict>
   <key>CFBundleDevelopmentRegion</key><string>zh_CN</string>
-  <key>CFBundleDisplayName</key><string>Panel</string>
-  <key>CFBundleName</key><string>Panel</string>
-  <key>CFBundleExecutable</key><string>Panel</string>
-  <key>CFBundleIdentifier</key><string>app.panel.desktop</string>
+  <key>CFBundleDisplayName</key><string>Drevi · 梦络</string>
+  <key>CFBundleName</key><string>Drevi</string>
+  <key>CFBundleExecutable</key><string>Drevi</string>
+  <key>CFBundleIdentifier</key><string>app.drevi.desktop</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>0.9.8</string>
-  <key>CFBundleVersion</key><string>0.9.8</string>
-  <key>CFBundleIconFile</key><string>Panel.icns</string>
+  <key>CFBundleShortVersionString</key><string>0.9.9</string>
+  <key>CFBundleVersion</key><string>0.9.9</string>
+  <key>CFBundleIconFile</key><string>Drevi.icns</string>
   <key>LSMinimumSystemVersion</key><string>13.5</string>
   <key>LSApplicationCategoryType</key><string>public.app-category.developer-tools</string>
   <key>NSHighResolutionCapable</key><true/>

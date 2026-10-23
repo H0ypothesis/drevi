@@ -9,9 +9,9 @@ const modelIds = ["mimo-v2.6-pro", "mimo-v2.6-flash", "mimo-v2.5-pro"];
 const envNames = [
   "XIAOMI_TOKEN_PLAN_CN_API_KEY",
   "XIAOMI_TOKEN_PLAN_CN_BASE_URL",
-  "PANEL_DEFAULT_MODEL",
+  "DREVI_DEFAULT_MODEL",
 ] as const;
-const dummyKey = "tp-panel-local-test-key";
+const dummyKey = "tp-drevi-local-test-key";
 
 test("MiMo independent thinking switch encodes on, off and default without effort", async (t) => {
   const modelId = modelIds[0];
@@ -91,7 +91,7 @@ function mockXiaomi(
   restoreEnv(t);
   process.env.XIAOMI_TOKEN_PLAN_CN_API_KEY = ` ${dummyKey} `;
   process.env.XIAOMI_TOKEN_PLAN_CN_BASE_URL = "https://xiaomi.invalid/v1/";
-  process.env.PANEL_DEFAULT_MODEL = `xiaomi-token-plan-cn/${modelId}`;
+  process.env.DREVI_DEFAULT_MODEL = `xiaomi-token-plan-cn/${modelId}`;
   const originalFetch = globalThis.fetch;
   t.after(() => {
     globalThis.fetch = originalFetch;

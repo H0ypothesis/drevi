@@ -83,18 +83,18 @@ function release(version = "v0.6", overrides = {}) {
     published_at: "2026-09-30T00:00:00Z",
     assets: [
       {
-        name: `Panel-mac-${process.arch}.zip`,
+        name: `Drevi-mac-${process.arch}.zip`,
         state: "uploaded",
         size: 3,
         digest: `sha256:${sha("zip")}`,
-        browser_download_url: `https://github.com/H0ypothesis/panel/releases/download/${version}/Panel-mac-${process.arch}.zip`,
+        browser_download_url: `https://github.com/H0ypothesis/drevi/releases/download/${version}/Drevi-mac-${process.arch}.zip`,
       },
     ],
     ...overrides,
   };
 }
 async function temp(t) {
-  const path = await mkdtemp(join(tmpdir(), "panel-updater-"));
+  const path = await mkdtemp(join(tmpdir(), "drevi-updater-"));
   t.after(() => rm(path, { recursive: true, force: true }));
   return path;
 }
@@ -139,7 +139,7 @@ test("only matching, uploaded, digest-bearing assets from this repository are el
     { size: -1 },
     { size: 1024 ** 3 },
     { name: "other.zip" },
-    { browser_download_url: "https://evil.example/Panel.zip" },
+    { browser_download_url: "https://evil.example/Drevi.zip" },
   ]) {
     const item = release();
     item.assets[0] = { ...item.assets[0], ...patch };
@@ -157,7 +157,7 @@ test("only matching, uploaded, digest-bearing assets from this repository are el
 
 const feed = (releases) => ({
   schemaVersion: 1,
-  repository: "H0ypothesis/panel",
+  repository: "H0ypothesis/drevi",
   releases,
 });
 
@@ -174,7 +174,7 @@ test("403 and offline API fall back to public release metadata for both check an
       }
       assert.equal(
         url,
-        "https://raw.githubusercontent.com/H0ypothesis/panel/main/updates/macos.json",
+        "https://raw.githubusercontent.com/H0ypothesis/drevi/main/updates/macos.json",
       );
       return Response.json(feed([release("v0.6"), release("v0.5.1")]));
     };
@@ -369,13 +369,13 @@ test("extraction preserves executable bits and safe internal framework symlinks"
     archive,
     zip([
       {
-        name: "Panel.app/Contents/MacOS/Panel",
+        name: "Drevi.app/Contents/MacOS/Drevi",
         data: "executable",
         mode: 0o100755,
       },
-      { name: "Panel.app/Versions/A/file", data: "resource" },
-      { name: "Panel.app/Versions/Current", data: "A", mode: 0o120777 },
-      { name: "__MACOSX/._Panel.app", data: "metadata" },
+      { name: "Drevi.app/Versions/A/file", data: "resource" },
+      { name: "Drevi.app/Versions/Current", data: "A", mode: 0o120777 },
+      { name: "__MACOSX/._Drevi.app", data: "metadata" },
     ]),
   );
   const app = await extractArchive(archive, join(directory, "unpacked"));
@@ -393,16 +393,16 @@ test("extraction blocks traversal, duplicate paths, special files and symlink es
     [{ name: "/tmp/outside", data: "bad" }],
     [{ name: "Other.app/file", data: "bad" }],
     [
-      { name: "Panel.app/file", data: "a" },
-      { name: "Panel.app/FILE", data: "b" },
+      { name: "Drevi.app/file", data: "a" },
+      { name: "Drevi.app/FILE", data: "b" },
     ],
-    [{ name: "Panel.app/socket", mode: 0o140777 }],
-    [{ name: "Panel.app/link", data: "../../outside", mode: 0o120777 }],
+    [{ name: "Drevi.app/socket", mode: 0o140777 }],
+    [{ name: "Drevi.app/link", data: "../../outside", mode: 0o120777 }],
     [
-      { name: "Panel.app/link", data: "dir", mode: 0o120777 },
-      { name: "Panel.app/link/file", data: "bad" },
+      { name: "Drevi.app/link", data: "dir", mode: 0o120777 },
+      { name: "Drevi.app/link/file", data: "bad" },
     ],
-    [{ name: "Panel.app/file", data: "small", size: 3 * 1024 ** 3 }],
+    [{ name: "Drevi.app/file", data: "small", size: 3 * 1024 ** 3 }],
   ];
   for (const [i, entries] of cases.entries()) {
     const archive = join(directory, `${i}.zip`);
@@ -416,7 +416,7 @@ test("extraction blocks traversal, duplicate paths, special files and symlink es
 
 test("successful replacement launches the new app and retains the backup until confirmed", async (t) => {
   const directory = await temp(t),
-    app = join(directory, "Panel.app"),
+    app = join(directory, "Drevi.app"),
     prepared = join(directory, "Next.app"),
     backup = join(directory, "Previous.app");
   await mkdir(app);
@@ -436,7 +436,7 @@ test("successful replacement launches the new app and retains the backup until c
 for (const failure of ["move", "launch"])
   test(`${failure} failure restores the original app`, async (t) => {
     const directory = await temp(t),
-      app = join(directory, "Panel.app"),
+      app = join(directory, "Drevi.app"),
       prepared = join(directory, "Next.app"),
       backup = join(directory, "Previous.app");
     await mkdir(app);

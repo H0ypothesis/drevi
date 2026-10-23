@@ -100,7 +100,7 @@ export function NewWorkspace({
       try {
         data = JSON.parse(text.replace(/^\uFEFF/, ""));
       } catch {
-        throw new Error("文件不是有效的 JSON，请选择 Panel 导出的 JSON 文件。");
+        throw new Error("文件不是有效的 JSON，请选择 Drevi 导出的 JSON 文件。");
       }
       setFile(importPreview(selected.name, data));
     } catch (reason) {
@@ -157,7 +157,7 @@ export function NewWorkspace({
       <p className="modal-intro">
         {mode === "blank"
           ? "每个空间自带临时目录，可直接开始；也可在根节点选择本地项目。"
-          : "导入他人分享的 Panel JSON，查看完整对话分支与历史回答。"}
+          : "导入他人分享的 Drevi JSON，查看完整对话分支与历史回答。"}
       </p>
       <div
         className="workspace-create-modes"
@@ -309,7 +309,7 @@ export function NewWorkspace({
                     </>
                   ) : (
                     <p>
-                      选择已导出的 panel-exploration.json 或其他 Panel JSON
+                      选择已导出的 drevi-exploration.json 或其他 Drevi JSON
                       文件。
                     </p>
                   )}
@@ -323,7 +323,7 @@ export function NewWorkspace({
                   autoFocus
                   type="text"
                   value={path}
-                  placeholder="~/Downloads/panel-exploration.json"
+                  placeholder="~/Downloads/drevi-exploration.json"
                   spellCheck={false}
                   autoComplete="off"
                   onChange={(event) => {
@@ -333,7 +333,7 @@ export function NewWorkspace({
                   aria-describedby="workspace-import-path-help"
                 />
                 <small id="workspace-import-path-help">
-                  填写绝对路径或 ~/ 路径。文件须位于运行 Panel 服务的机器上。
+                  填写绝对路径或 ~/ 路径。文件须位于运行 Drevi 服务的机器上。
                 </small>
               </label>
             )}

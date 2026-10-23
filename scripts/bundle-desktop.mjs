@@ -33,7 +33,7 @@ await build({
   // Apply source mappings inside the upstream subagent dependency, too.
   plugins: [
     {
-      name: "panel-pi-source",
+      name: "drevi-pi-source",
       setup(builder) {
         // Native discovery, theme assets and extension resolution depend on the
         // original package location, even when their code is inlined.
@@ -95,7 +95,7 @@ await build({
   ],
   define: { "process.env.NODE_ENV": '"production"' },
   banner: {
-    js: 'import { createRequire as __panelCreateRequire } from "node:module"; const require = __panelCreateRequire(import.meta.url);',
+    js: 'import { createRequire as __dreviCreateRequire } from "node:module"; const require = __dreviCreateRequire(import.meta.url);',
   },
   // Jiti lazily requires its sibling Babel transform; preserve that layout.
   external: ["vite", "jiti", "@anthropic-ai/sandbox-runtime"],
@@ -215,7 +215,7 @@ await build({
   format: "esm",
   target: "node22",
   banner: {
-    js: 'import { createRequire as __panelCreateRequire } from "node:module"; const require = __panelCreateRequire(import.meta.url);',
+    js: 'import { createRequire as __dreviCreateRequire } from "node:module"; const require = __dreviCreateRequire(import.meta.url);',
   },
 });
 await cp(join(root, "dist"), join(output, "dist"), { recursive: true });
@@ -225,7 +225,7 @@ await cp(join(root, ".env.example"), join(output, ".env.example"));
 const cuaTarget = runtimeTarget();
 const cuaSource = join(
   root,
-  ".panel/cua-driver",
+  ".drevi/cua-driver",
   cuaRelease.version,
   cuaTarget,
 );

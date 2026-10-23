@@ -23,18 +23,18 @@ test(
   "Mac update archive omits resource forks, preserves links and passes updater validation",
   { skip: process.platform !== "darwin" },
   async (t) => {
-    const directory = await mkdtemp(join(tmpdir(), "panel-mac-package-"));
+    const directory = await mkdtemp(join(tmpdir(), "drevi-mac-package-"));
     t.after(() => rm(directory, { recursive: true, force: true }));
-    const app = join(directory, "Panel.app"),
-      archive = join(directory, "Panel.zip");
+    const app = join(directory, "Drevi.app"),
+      archive = join(directory, "Drevi.zip");
     await mkdir(join(app, "Contents/MacOS"), { recursive: true });
     await mkdir(join(app, "Contents/Resources"));
-    await cp("/usr/bin/true", join(app, "Contents/MacOS/Panel"));
+    await cp("/usr/bin/true", join(app, "Contents/MacOS/Drevi"));
     await writeFile(
       join(app, "Contents/Info.plist"),
       `<?xml version="1.0"?><plist version="1.0"><dict>
-    <key>CFBundleIdentifier</key><string>app.panel.desktop</string>
-    <key>CFBundleExecutable</key><string>Panel</string>
+    <key>CFBundleIdentifier</key><string>app.drevi.desktop</string>
+    <key>CFBundleExecutable</key><string>Drevi</string>
     <key>CFBundleShortVersionString</key><string>0.9.5</string>
     <key>CFBundleVersion</key><string>0.9.5</string>
     <key>LSMinimumSystemVersion</key><string>13.5</string>
@@ -45,7 +45,7 @@ test(
     await symlink("file.txt", join(app, "Contents/Resources/current"));
     await run("/usr/bin/xattr", [
       "-w",
-      "com.panel.package-test",
+      "com.drevi.package-test",
       "metadata",
       resource,
     ]);
@@ -54,7 +54,7 @@ test(
     const zip = await yauzl.openPromise(archive);
     const names = [];
     for await (const entry of zip.eachEntry()) names.push(entry.fileName);
-    assert.ok(names.includes("Panel.app/Contents/Info.plist"));
+    assert.ok(names.includes("Drevi.app/Contents/Info.plist"));
     assert.ok(names.every((name) => !name.startsWith("__MACOSX/")));
     const unpacked = await extractArchive(archive, join(directory, "unpacked"));
     await validateApp(unpacked, "0.9.5");

@@ -67,7 +67,7 @@ type ObjectValue = Record<string, unknown>;
 
 function invalid(label: string): never {
   throw new Error(
-    `导入失败：${label}格式无效，请选择 Panel 导出的 JSON 文件。`,
+    `导入失败：${label}格式无效，请选择 Drevi 导出的 JSON 文件。`,
   );
 }
 
@@ -674,12 +674,12 @@ function toolCalls(value: unknown, label: string, now: number): ToolCall[] {
   });
 }
 
-/** Parse a Panel export into an independent, inert local exploration. */
+/** Parse a Drevi export into an independent, inert local exploration. */
 export function importWorkspace(value: unknown): StoredWorkspace {
   const envelope = object(value, "JSON 文件");
   if (envelope.version !== 1)
     throw new Error(
-      "导入失败：不支持此导出版本，请选择版本 1 的 Panel JSON 文件。",
+      "导入失败：不支持此导出版本，请选择版本 1 的 Drevi JSON 文件。",
     );
   if (
     envelope.exportedAt !== undefined &&

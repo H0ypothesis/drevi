@@ -7,9 +7,9 @@ import {
   type Provider,
   type AssistantMessageEvent,
 } from "@earendil-works/pi-ai";
-import { createPanelChildSession } from "./subagent-session.ts";
+import { createDreviChildSession } from "./subagent-session.ts";
 import {
-  createPanelTools,
+  createDreviTools,
   codingExecutionStartedNotice,
 } from "./coding-tools.ts";
 import { createWebTools } from "./web-tools.ts";
@@ -36,8 +36,8 @@ export interface HostBridgeConfig {
 }
 
 export async function hostBridgeConfig(): Promise<HostBridgeConfig> {
-  const path = process.env.PANEL_SUBAGENT_HOST_CONFIG;
-  if (!path) throw new Error("缺少 Panel 子代理宿主配置。");
+  const path = process.env.DREVI_SUBAGENT_HOST_CONFIG;
+  if (!path) throw new Error("缺少 Drevi 子代理宿主配置。");
   return JSON.parse(await readFile(path, "utf8"));
 }
 
@@ -104,8 +104,8 @@ export function bridgeProviders(
         models: models.filter((model) => model.provider === id),
         auth: {
           apiKey: {
-            name: "Panel model bridge",
-            resolve: async () => ({ auth: { apiKey: "panel-host" } }),
+            name: "Drevi model bridge",
+            resolve: async () => ({ auth: { apiKey: "drevi-host" } }),
           },
         },
         api: { stream, streamSimple: stream },
@@ -120,11 +120,11 @@ export function bridgeProviders(
 }
 
 /** Also loaded by the plugin's detached runner, so every native child is guarded. */
-export default function panelHostChildFactory(): ChildSessionFactory & {
+export default function dreviHostChildFactory(): ChildSessionFactory & {
   stopAll(): Promise<void>;
 } {
   const sessions = new Set<
-    Awaited<ReturnType<typeof createPanelChildSession>>
+    Awaited<ReturnType<typeof createDreviChildSession>>
   >();
   const factory: ChildSessionFactory & { stopAll(): Promise<void> } = {
     async create(launch: ChildSessionLaunch) {
@@ -191,8 +191,8 @@ export default function panelHostChildFactory(): ChildSessionFactory & {
         void task.catch(() => {}).finally(() => pending.delete(task));
         return task;
       };
-      let session: Awaited<ReturnType<typeof createPanelChildSession>>;
-      const codingTools = createPanelTools(launch.cwd);
+      let session: Awaited<ReturnType<typeof createDreviChildSession>>;
+      const codingTools = createDreviTools(launch.cwd);
       for (const tool of codingTools) {
         tool.execute = (toolId, args, signal, onUpdate) =>
           callSubagentBridge(
@@ -211,7 +211,7 @@ export default function panelHostChildFactory(): ChildSessionFactory & {
       try {
         session = launch.machine
           ? await (await loadNicobailon()).createHerdrPiSession(launch)
-          : await createPanelChildSession(launch, {
+          : await createDreviChildSession(launch, {
               id,
               providers: bridgeProviders(config.address, bootstrap.models, id),
               tools: [

@@ -30,7 +30,7 @@ test(
   { timeout: 60000 },
   async () => {
     const directory = await realpath(
-      await mkdtemp(join(tmpdir(), "panel-native-approval-time-")),
+      await mkdtemp(join(tmpdir(), "drevi-native-approval-time-")),
     );
     const cwd = join(directory, "project");
     await mkdir(join(cwd, ".pi", "agents"), { recursive: true });
@@ -165,7 +165,7 @@ test(
   { timeout: 60000 },
   async () => {
     const directory = await realpath(
-      await mkdtemp(join(tmpdir(), "panel-native-execution-time-")),
+      await mkdtemp(join(tmpdir(), "drevi-native-execution-time-")),
     );
     const cwd = join(directory, "project");
     await mkdir(join(cwd, ".pi", "agents"), { recursive: true });
@@ -257,7 +257,7 @@ test(
   { timeout: 60000 },
   async () => {
     const directory = await realpath(
-      await mkdtemp(join(tmpdir(), "panel-native-worktree-")),
+      await mkdtemp(join(tmpdir(), "drevi-native-worktree-")),
     );
     const cwd = join(directory, "project");
     await mkdir(join(cwd, ".pi", "agents"), { recursive: true });
@@ -272,9 +272,9 @@ test(
       "git",
       [
         "-c",
-        "user.name=Panel Test",
+        "user.name=Drevi Test",
         "-c",
-        "user.email=panel@example.invalid",
+        "user.email=drevi@example.invalid",
         "commit",
         "-qm",
         "fixture",
@@ -387,7 +387,7 @@ test(
   { timeout: 60000 },
   async () => {
     const directory = await realpath(
-      await mkdtemp(join(tmpdir(), "panel-child-sandbox-")),
+      await mkdtemp(join(tmpdir(), "drevi-child-sandbox-")),
     );
     const cwd = join(directory, "project");
     await mkdir(join(cwd, ".pi/agents"), { recursive: true });
@@ -461,7 +461,7 @@ test(
   "native host loads the full tool, retains role exclusions and runs a guarded Pi child",
   { timeout: 60000 },
   async () => {
-    const directory = await mkdtemp(join(tmpdir(), "panel-native-host-test-"));
+    const directory = await mkdtemp(join(tmpdir(), "drevi-native-host-test-"));
     const cwd = join(directory, "project");
     await mkdir(cwd);
     await mkdir(join(cwd, ".pi", "agents"), { recursive: true });
@@ -489,7 +489,7 @@ test(
         let resource;
         pi.on("session_start", (_event, ctx) => {
           resource = registerWorkflowResource({ sessionId: ctx.sessionManager.getSessionId(),
-            definition: { name: "panel-test", version: 1, resolve: () => ({ script: 'return "named-workflow-ok";' }) } });
+            definition: { name: "drevi-test", version: 1, resolve: () => ({ script: 'return "named-workflow-ok";' }) } });
         });
         pi.on("session_shutdown", () => resource?.dispose());
       }
@@ -543,7 +543,7 @@ test(
         ),
       );
       const named = await host.execute("subagent", {
-        workflow: "panel-test",
+        workflow: "drevi-test",
         async: false,
       });
       assert.match(JSON.stringify(named), /named-workflow-ok/);
@@ -563,7 +563,7 @@ test(
       );
       const scheduled = await host.execute("subagent", {
         action: "schedule.create",
-        name: "panel-schedule-fixture",
+        name: "drevi-schedule-fixture",
         at: new Date(Date.now() + 86400000).toISOString(),
         workflowScript: 'return "scheduled-fixture";',
       });
@@ -576,7 +576,7 @@ test(
         const list = await other.execute("subagent", {
           action: "schedule.list",
         });
-        assert.doesNotMatch(JSON.stringify(list), /panel-schedule-fixture/);
+        assert.doesNotMatch(JSON.stringify(list), /drevi-schedule-fixture/);
       } finally {
         await other.close();
       }
@@ -586,7 +586,7 @@ test(
         const list = await restarted.execute("subagent", {
           action: "schedule.list",
         });
-        assert.match(JSON.stringify(list), /panel-schedule-fixture/);
+        assert.match(JSON.stringify(list), /drevi-schedule-fixture/);
       } finally {
         await restarted.close();
       }
@@ -601,7 +601,7 @@ test(
   "running foreground child detaches without losing its pending tool or result",
   { timeout: 60000 },
   async () => {
-    const directory = await mkdtemp(join(tmpdir(), "panel-native-detach-"));
+    const directory = await mkdtemp(join(tmpdir(), "drevi-native-detach-"));
     const cwd = join(directory, "project");
     await mkdir(join(cwd, ".pi", "agents"), { recursive: true });
     await writeFile(join(cwd, "input.txt"), "fixture");
@@ -703,7 +703,7 @@ test(
   "native async survives its dispatch and publishes completion",
   { timeout: 60000 },
   async () => {
-    const directory = await mkdtemp(join(tmpdir(), "panel-native-async-"));
+    const directory = await mkdtemp(join(tmpdir(), "drevi-native-async-"));
     const cwd = join(directory, "project");
     await mkdir(join(cwd, ".pi", "agents"), { recursive: true });
     await writeFile(
@@ -776,10 +776,10 @@ test(
 );
 
 test(
-  "nested delegation uses the Panel factory and a completed child resumes after host restart",
+  "nested delegation uses the Drevi factory and a completed child resumes after host restart",
   { timeout: 90000 },
   async () => {
-    const directory = await mkdtemp(join(tmpdir(), "panel-native-nested-"));
+    const directory = await mkdtemp(join(tmpdir(), "drevi-native-nested-"));
     const cwd = join(directory, "project");
     await mkdir(join(cwd, ".pi", "agents"), { recursive: true });
     await writeFile(
@@ -921,7 +921,7 @@ test(
   "explicit external CLI roles use the native background runner without restoring removed roles",
   { timeout: 60000 },
   async () => {
-    const directory = await mkdtemp(join(tmpdir(), "panel-native-cli-"));
+    const directory = await mkdtemp(join(tmpdir(), "drevi-native-cli-"));
     const cwd = join(directory, "project");
     await mkdir(join(cwd, ".pi", "agents"), { recursive: true });
     await writeFile(

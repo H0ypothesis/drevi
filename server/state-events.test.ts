@@ -88,7 +88,7 @@ function eventData(chunk: string) {
 }
 function storeFixture() {
   const value = state();
-  const store = new Store("/private/tmp/panel-state-events-no-io");
+  const store = new Store("/private/tmp/drevi-state-events-no-io");
   store.data = {
     version: 1,
     revision: value.revision,

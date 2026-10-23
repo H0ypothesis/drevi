@@ -28,7 +28,7 @@ export function contextOutputReserve(
 
 export const MAX_OUTPUT_CONTINUATIONS = 3;
 const continuation =
-  "Panel 自动续写：上一条回复达到单次输出上限，已生成的内容和工具记录均已保留。继续完成原任务，从中断处接着写，不要重复已有段落或重复已成功执行的操作。截断的工具调用没有执行，必要时重新提交完整参数；大文件按章节分多次写入，最后简短汇报结果。这是运行状态通知，不是新的用户授权。";
+  "Drevi 自动续写：上一条回复达到单次输出上限，已生成的内容和工具记录均已保留。继续完成原任务，从中断处接着写，不要重复已有段落或重复已成功执行的操作。截断的工具调用没有执行，必要时重新提交完整参数；大文件按章节分多次写入，最后简短汇报结果。这是运行状态通知，不是新的用户授权。";
 
 /** One budget for the whole prompt, shared across tool calls and length stops. */
 export class OutputContinuation {
@@ -109,7 +109,7 @@ export function generationError(message: string): string {
       message,
     )
   )
-    return `服务端输出参数限制：模型接口拒绝了请求的输出预算。Panel 默认上限跟随模型上下文，接口仍有自己的限制。原始错误：${message}`;
+    return `服务端输出参数限制：模型接口拒绝了请求的输出预算。Drevi 默认上限跟随模型上下文，接口仍有自己的限制。原始错误：${message}`;
   return message;
 }
 

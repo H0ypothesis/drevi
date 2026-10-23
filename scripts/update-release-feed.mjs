@@ -21,7 +21,7 @@ export function publishedReleaseMetadata(release) {
     return candidate
       ? [
           {
-            name: `Panel-mac-${architecture}.zip`,
+            name: `Drevi-mac-${architecture}.zip`,
             state: "uploaded",
             size: candidate.size,
             digest: `sha256:${candidate.sha256}`,
@@ -68,7 +68,7 @@ async function main() {
   await writeFile(
     path,
     JSON.stringify(
-      { schemaVersion: 1, repository: "H0ypothesis/panel", releases },
+      { schemaVersion: 1, repository: "H0ypothesis/drevi", releases },
       null,
       2,
     ) + "\n",

@@ -16,7 +16,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import type { ModelOption, RunConfig, ToolCall } from "../shared/types.ts";
 import {
   codingSandboxScope,
-  createPanelTools,
+  createDreviTools,
   isCodingExecutionStartedNotice,
 } from "./coding-tools.ts";
 import type { RunEnvironment, Runtime } from "./runtime.ts";
@@ -53,7 +53,7 @@ async function until(check: () => boolean) {
 }
 async function directoryFixture(t: TestContext, clean = true) {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-recovery-")),
+    await mkdtemp(join(tmpdir(), "drevi-recovery-")),
   );
   const project = join(directory, "project");
   await mkdir(project);
@@ -141,7 +141,7 @@ test("automatic setup recovery executes the command once without asking for host
   const { project } = await directoryFixture(t);
   let attempts = 0;
   let recoveries = 0;
-  const bash = createPanelTools(project, undefined, {
+  const bash = createDreviTools(project, undefined, {
     prepare: async (command) => {
       if (++attempts === 1)
         throw new SandboxSetupError("worker_exit", "worker exited");
@@ -161,7 +161,7 @@ test("automatic setup recovery executes the command once without asking for host
 test("a command that started and then failed is never replayed or offered host recovery", async (t) => {
   const { project } = await directoryFixture(t);
   let recoveries = 0;
-  const bash = createPanelTools(project, undefined, {
+  const bash = createDreviTools(project, undefined, {
     prepare: async (command) => ready(command, project),
     recover: async () => {
       recoveries++;
@@ -187,7 +187,7 @@ test("recovery waiting neither starts the execution deadline nor publishes a she
     choose = resolve;
   });
   let started = 0;
-  const bash = createPanelTools(project, undefined, {
+  const bash = createDreviTools(project, undefined, {
     prepare: async () => {
       throw setupFailure();
     },
@@ -244,7 +244,7 @@ async function executionFixture(
       assert.ok(environment);
       execution = environment;
       const activeSignal = AbortSignal.any([signal, controller.signal]);
-      const bash = createPanelTools(project, undefined, {
+      const bash = createDreviTools(project, undefined, {
         preflight: Promise.resolve({ attempts: 1, error: setupFailure() }),
         prepare: async (command) => {
           attempts++;

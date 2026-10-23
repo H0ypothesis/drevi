@@ -1,3 +1,5 @@
+import { PROXY_FAKE_IP_RANGE } from "./web-dns.ts";
+
 export const PI_WEB_VERSION = "0.34.0";
 export interface PiWebResult {
   text: string;
@@ -9,7 +11,9 @@ export const PI_WEB_CONFIG = {
   workflow: "none",
   autoOpenBrowser: false,
   fetchRouting: { providers: ["http"], allowRemoteHostedProviders: false },
-  ssrf: { allowRanges: [], trustEnvProxy: false },
+  // Let synthetic DNS reach Drevi's transport, which resolves, validates and
+  // pins the real public target. Literal Fake-IP URLs remain blocked by webUrl.
+  ssrf: { allowRanges: [PROXY_FAKE_IP_RANGE], trustEnvProxy: false },
   githubClone: { enabled: false },
   githubPrIssue: { enabled: false },
   youtube: { enabled: false },

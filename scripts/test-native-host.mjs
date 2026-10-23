@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-const root = resolve(process.env.PANEL_TEST_APP ?? "build/desktop/app");
+const root = resolve(process.env.DREVI_TEST_APP ?? "build/desktop/app");
 const { NativeSubagentHost } = await import(
   pathToFileURL(join(root, "server/subagent-host.mjs")).href
 );
@@ -17,7 +17,7 @@ const {
   pathToFileURL(join(root, "node_modules/@earendil-works/pi-ai/dist/index.js"))
     .href
 );
-const directory = await mkdtemp(join(tmpdir(), "panel-bundled-agents-"));
+const directory = await mkdtemp(join(tmpdir(), "drevi-bundled-agents-"));
 const cwd = join(directory, "project");
 await mkdir(join(cwd, ".pi/agents"), { recursive: true });
 await writeFile(

@@ -61,7 +61,7 @@ export function createNativeWebSession() {
       if (!child) {
         sessions.add(close);
         initializing = (async () => {
-          directory = await mkdtemp(join(tmpdir(), "panel-native-web-"));
+          directory = await mkdtemp(join(tmpdir(), "drevi-native-web-"));
           await writeFile(
             join(directory, "web-search.json"),
             JSON.stringify(NATIVE_WEB_CONFIG),

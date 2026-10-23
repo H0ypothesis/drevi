@@ -123,7 +123,7 @@ const discovery: Record<string, Check> = {
   list_apps: empty,
   list_windows: (args) =>
     shape(args, { pid: integer(1), on_screen_only: boolean }),
-  // Panel injects prompt:false; accepting a caller's prompt would bypass that boundary.
+  // Drevi injects prompt:false; accepting a caller's prompt would bypass that boundary.
   check_permissions: (args) => shape(args, { probe_direct_capture: boolean }),
   health_report: (args) =>
     shape(args, { include: healthChecks, skip: healthChecks }),

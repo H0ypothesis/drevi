@@ -241,7 +241,7 @@ test("restart and missing raw history retain prompt, references, attachments, vi
     },
   ];
   const directory = await mkdtemp(
-    join(tmpdir(), "panel-continuation-restart-"),
+    join(tmpdir(), "drevi-continuation-restart-"),
   );
   try {
     const store = new Store(directory);
@@ -325,7 +325,7 @@ test("branch eligibility excludes active, stale and every pending retry-restore 
 });
 
 test("cancelled ancestors must finish saving before a new branch can run, then descendants inherit progress", async () => {
-  const directory = await mkdtemp(join(tmpdir(), "panel-continuation-settle-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-continuation-settle-"));
   const store = new Store(directory);
   await store.init(false);
   const workspace = createWorkspace("Root", "Context");
@@ -406,7 +406,7 @@ test("cancelled ancestors must finish saving before a new branch can run, then d
 
 test("completed ancestors can branch while their final save is still finishing", async () => {
   const directory = await mkdtemp(
-    join(tmpdir(), "panel-completed-continuation-"),
+    join(tmpdir(), "drevi-completed-continuation-"),
   );
   const store = new Store(directory);
   await store.init(false);

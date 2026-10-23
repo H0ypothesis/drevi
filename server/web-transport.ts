@@ -8,6 +8,7 @@ import {
 import { request as httpsRequest } from "node:https";
 import { isIP } from "node:net";
 import { brotliDecompress, gunzip, inflate } from "node:zlib";
+import { isProxyFakeAddress, lookupProxyTarget } from "./web-dns.ts";
 
 export interface WebAddress {
   address: string;
@@ -21,6 +22,10 @@ export type WebRequestFactory = (
 /** Server-owned configuration; never accept these values from an agent. */
 export interface WebTransportOptions {
   lookup?: (hostname: string) => Promise<WebAddress[]>;
+  lookupPublic?: (
+    hostname: string,
+    signal: AbortSignal,
+  ) => Promise<WebAddress[]>;
   request?: WebRequestFactory;
   timeoutMs?: number;
   maxBytes?: number;
@@ -108,8 +113,13 @@ export function webUrl(value: unknown): URL {
     .toLowerCase()
     .replace(/\.$/, "");
   if (
+    (!isIP(hostname) && !hostname.includes(".")) ||
     hostname === "localhost" ||
     hostname.endsWith(".localhost") ||
+    hostname.endsWith(".local") ||
+    hostname.endsWith(".internal") ||
+    hostname === "home.arpa" ||
+    hostname.endsWith(".home.arpa") ||
     (isIP(hostname) && !publicAddress(hostname))
   )
     throw new WebTransportError(
@@ -123,13 +133,13 @@ async function abortable<T>(
   promise: Promise<T>,
   signal: AbortSignal,
 ): Promise<T> {
-  signal.throwIfAborted();
   return new Promise((resolve, reject) => {
     const abort = () => reject(signal.reason);
     signal.addEventListener("abort", abort, { once: true });
     promise
       .then(resolve, reject)
       .finally(() => signal.removeEventListener("abort", abort));
+    if (signal.aborted) abort();
   });
 }
 
@@ -176,7 +186,7 @@ async function requestOnce(
 ): Promise<RawResponse> {
   signal.throwIfAborted();
   const hostname = url.hostname.replace(/^\[|\]$/g, "");
-  const addresses = isIP(hostname)
+  let addresses = isIP(hostname)
     ? [{ address: hostname, family: isIP(hostname) }]
     : await abortable(
         (
@@ -185,6 +195,31 @@ async function requestOnce(
         )(hostname),
         signal,
       );
+  if (
+    !isIP(hostname) &&
+    addresses.some(({ address }) => isProxyFakeAddress(address)) &&
+    addresses.every(
+      ({ address, family }) =>
+        isIP(address) === family &&
+        (publicAddress(address) || isProxyFakeAddress(address)),
+    )
+  ) {
+    try {
+      addresses = await abortable(
+        (
+          options.lookupPublic ??
+          ((host, lookupSignal) =>
+            lookupProxyTarget(host, lookupSignal, publicDnsFetch))
+        )(hostname, signal),
+        signal,
+      );
+    } catch {
+      signal.throwIfAborted();
+      throw new WebTransportError(
+        "代理 Fake-IP 的公网 DNS 校验失败，请检查加密 DNS 网络连接。",
+      );
+    }
+  }
   if (
     !addresses.length ||
     addresses.some(
@@ -388,7 +423,7 @@ export function createPublicFetch(
       let headers = new Headers(request.headers);
       for (const name of FORBIDDEN_HEADERS) headers.delete(name);
       if (!headers.has("user-agent"))
-        headers.set("user-agent", "Panel-Web/1.0");
+        headers.set("user-agent", "Drevi-Web/1.0");
       for (let redirects = 0; ; redirects++) {
         const response = await requestOnce(
           url,
@@ -462,5 +497,16 @@ export function createPublicFetch(
     }
   };
 }
+
+// Bootstrap without system DNS, so a TUN's synthetic answers cannot recurse.
+// The request URL retains the resolver hostname for TLS/SNI and HTTP Host.
+const publicDnsFetch = createPublicFetch({
+  lookup: async (hostname) =>
+    hostname === "cloudflare-dns.com"
+      ? [{ address: "1.1.1.1", family: 4 }]
+      : [],
+  timeoutMs: 8_000,
+  maxBytes: 64 * 1024,
+});
 
 export const publicFetch = createPublicFetch();

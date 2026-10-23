@@ -8,7 +8,7 @@ export interface ComputerUsePreviewState {
   label: string;
   action?: string;
   error?: string;
-  /** The exact Panel-owned driver process; never supplied by a model/client. */
+  /** The exact Drevi-owned driver process; never supplied by a model/client. */
   nativeOverlay?: { pid: number; bundlePath: string };
 }
 

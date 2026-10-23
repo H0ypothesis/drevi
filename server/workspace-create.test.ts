@@ -34,7 +34,7 @@ const config = {
 } as const;
 
 async function fixture(t: TestContext) {
-  const directory = await mkdtemp(join(tmpdir(), "panel-workspace-create-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-workspace-create-"));
   const dataDirectory = join(directory, "data");
   const store = new Store(dataDirectory);
   await store.init(false);

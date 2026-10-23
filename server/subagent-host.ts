@@ -196,7 +196,7 @@ export class NativeSubagentHost {
       recursive: true,
       mode: 0o700,
     });
-    // Keep plugin configuration and role management in Panel's own data directory.
+    // Keep plugin configuration and role management in Drevi's own data directory.
     const configPath = join(agentDir, "extensions", "subagent", "config.json");
     let pluginConfig: Record<string, unknown> = {};
     try {
@@ -215,7 +215,7 @@ export class NativeSubagentHost {
     };
     // Retain global skills, context, and ambient MCP/extension providers for
     // detached children. Their role and native inheritance settings still decide
-    // which resources are loaded; Panel keeps its own writable role settings.
+    // which resources are loaded; Drevi keeps its own writable role settings.
     for (const name of [
       "skills",
       "AGENTS.md",
@@ -322,7 +322,7 @@ export class NativeSubagentHost {
       { mode: 0o600 },
     );
     await rename(temporaryPluginConfig, hostPluginConfig);
-    this.temporary = await mkdtemp(join(tmpdir(), "panel-agents-"));
+    this.temporary = await mkdtemp(join(tmpdir(), "drevi-agents-"));
     this.bridge = await serveSubagentBridge(
       join(this.temporary, "bridge.sock"),
       this.handle,
@@ -360,7 +360,7 @@ export class NativeSubagentHost {
               NODE_OPTIONS: `--import=${JSON.stringify(import.meta.resolve("tsx"))} --import=${JSON.stringify(new URL("./subagent-source-loader.mjs", import.meta.url).href)}`,
             }
           : {}),
-        PANEL_SUBAGENT_HOST_CONFIG: hostConfig,
+        DREVI_SUBAGENT_HOST_CONFIG: hostConfig,
         PI_CODING_AGENT_DIR: hostAgentDir,
         PI_SUBAGENT_EXTRA_AGENT_DIRS: [
           join(originalAgentDir, "agents"),
@@ -745,7 +745,7 @@ export class NativeSubagentHost {
           ])
         : signal;
       // The worker authenticates to a dummy provider. Resolve real credentials
-      // only through Panel's registry; never forward dummy auth or environment.
+      // only through Drevi's registry; never forward dummy auth or environment.
       const {
         apiKey: _apiKey,
         env: _env,

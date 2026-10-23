@@ -16,7 +16,7 @@ OpenAI 可选择接口协议：自动模式下，内置模型使用 Responses，
 
 模型列表通过本机后端按供应商协议获取，支持 OpenAI 兼容接口、Anthropic 和 Gemini；可点击 Model 右侧刷新按钮重试。获取列表不会保存配置或自动启用所有模型，只有点击「保存配置」才会保存选中的 Model ID。接口不支持列表、认证失败或网络超时时仍可手动填写。打开已有连接会使用已保存的密钥获取列表；若修改了 URL，必须填写该地址的 Key 才会再次获取，避免自动向新地址发送原密钥。
 
-再次编辑时不会显示原密钥，API Key 留空会保留原有密钥。配置保存到 `<PANEL_DATA_DIR>/model-providers.json`（源码启动默认 `.panel/model-providers.json`），文件仅允许当前用户读写。界面保存的供应商配置优先于环境变量；未设置的供应商继续使用原有环境配置。密钥不写入浏览器存储，也不包含在探索导出中。
+再次编辑时不会显示原密钥，API Key 留空会保留原有密钥。配置保存到 `<DREVI_DATA_DIR>/model-providers.json`（源码启动默认 `.drevi/model-providers.json`），文件仅允许当前用户读写。界面保存的供应商配置优先于环境变量；未设置的供应商继续使用原有环境配置。密钥不写入浏览器存储，也不包含在探索导出中。
 
 ## 使用环境变量配置
 
@@ -36,12 +36,12 @@ GEMINI_API_KEY=...
 PAPERBYPASS_API_KEY=你的密钥
 PAPERBYPASS_BASE_URL=https://aigateway.paperbypass.com/api
 PAPERBYPASS_MODEL=openai/gpt-5.6-luna-pro
-PANEL_DEFAULT_MODEL=paperbypass/openai/gpt-5.6-luna-pro
+DREVI_DEFAULT_MODEL=paperbypass/openai/gpt-5.6-luna-pro
 ```
 
-网关通过 `Authorization: Bearer` 调用 `/api/v1/messages`，支持流式文本对话和工具调用。通过 Paperbypass 使用 Atria 只需 `PAPERBYPASS_API_KEY`，无需配置直连服务的 `ATRIA_API_KEY`；如需设为默认模型，将 `PANEL_DEFAULT_MODEL` 改为 `paperbypass/Atria-Dawn-Preview`。
+网关通过 `Authorization: Bearer` 调用 `/api/v1/messages`，支持流式文本对话和工具调用。通过 Paperbypass 使用 Atria 只需 `PAPERBYPASS_API_KEY`，无需配置直连服务的 `ATRIA_API_KEY`；如需设为默认模型，将 `DREVI_DEFAULT_MODEL` 改为 `paperbypass/Atria-Dawn-Preview`。
 
-Paperbypass 分组内置 `z-ai/glm-5.3-flash` 的图片输入支持，依据[智谱官方模型卡](https://huggingface.co/zai-org/GLM-5.3-Flash)，可接收图片附件和电脑控制截图。此前已作为自定义模型保存的同名型号会自动使用这项能力，保留已配置的上下文预算。此声明不扩展到 `z-ai/glm-5.3` 或其他未知型号，也不代表 Panel 已支持视频或音频输入。
+Paperbypass 分组内置 `z-ai/glm-5.3-flash` 的图片输入支持，依据[智谱官方模型卡](https://huggingface.co/zai-org/GLM-5.3-Flash)，可接收图片附件和电脑控制截图。此前已作为自定义模型保存的同名型号会自动使用这项能力，保留已配置的上下文预算。此声明不扩展到 `z-ai/glm-5.3` 或其他未知型号，也不代表 Drevi 已支持视频或音频输入。
 
 `z-ai/glm-5.3` 和 `z-ai/glm-5.3-flash` 按[智谱官方说明](https://docs.z.ai/guides/capabilities/thinking)强制开启思考，提供 `low / high / max` 三个档位。默认及旧对话的 `off` 设置使用 `low`，通过网关的 `reasoning_effort` 传递；不发送该网关会拒绝的 Anthropic `thinking` 参数。自动审核独立选择 `low`，单次输出最多 8,192 tokens（包括思考和结论），上下文预算同步预留这部分空间；仍须在 60 秒内返回完整有效的审核 JSON。
 
@@ -55,7 +55,7 @@ Paperbypass 的 `anthropic/claude-opus-5.5` 按 [Claude 官方能力](https://pl
 
 检测只能确认请求接受或拒绝，不能证明不同 effort 的真实计算量不同。无效值也被接受时会提示网关可能忽略参数；只有无效值被拒绝的字段才可一键填入通过校验的选项。超时、认证失败、响应异常均显示未确认；未返回思考内容不代表思考关闭。可以按官方文档手动调整后保存。Paperbypass 目录目前没有 effort 能力元数据，未知型号显示「服务默认」。未编辑思考设置时保存其他连接信息会保留原配置。
 
-`PANEL_DEFAULT_MODEL` 决定从探索起点发起对话时的默认模型；历史对话仍继承各自的模型设置。`PAPERBYPASS_MODEL` 可替换默认的 Luna Pro 模型 ID，Atria 选项始终保留。其他网关型号不发送额外思考参数，Atria 采用其[官方文档](https://api.atria-asi.ai/docs)中的 256,000 上下文窗口，其余模型采用 128,000 的本地上下文预算，不提供网关费用估算。
+`DREVI_DEFAULT_MODEL` 决定从探索起点发起对话时的默认模型；历史对话仍继承各自的模型设置。`PAPERBYPASS_MODEL` 可替换默认的 Luna Pro 模型 ID，Atria 选项始终保留。其他网关型号不发送额外思考参数，Atria 采用其[官方文档](https://api.atria-asi.ai/docs)中的 256,000 上下文窗口，其余模型采用 128,000 的本地上下文预算，不提供网关费用估算。
 
 支持 API Key 配置及 Anthropic token 环境变量；不会读取 Pi CLI 的 OAuth 登录状态。模型密钥只在服务端使用，不保存在浏览器或导出文件中。
 
@@ -67,7 +67,7 @@ ATRIA_BASE_URL=https://api.atria-asi.ai
 ATRIA_MODEL=Atria-Dawn-Preview
 ```
 
-重启后可在模型选择器中选择 `Atria-Dawn-Preview`。该接口通过 `x-api-key` 调用 `/v1/messages`，支持流式文本对话，上下文窗口为 256,000 tokens。Panel 采用 8,192 tokens 的本地输出预算，不发送额外思考参数，不提供 Atria 费用估算。如需设为默认模型，将 `PANEL_DEFAULT_MODEL` 改为 `atria/Atria-Dawn-Preview`。
+重启后可在模型选择器中选择 `Atria-Dawn-Preview`。该接口通过 `x-api-key` 调用 `/v1/messages`，支持流式文本对话，上下文窗口为 256,000 tokens。Drevi 采用 8,192 tokens 的本地输出预算，不发送额外思考参数，不提供 Atria 费用估算。如需设为默认模型，将 `DREVI_DEFAULT_MODEL` 改为 `atria/Atria-Dawn-Preview`。
 
 小米 MiMo Token Plan 中国区使用 [官方 Token Plan 接口](https://mimo.mi.com/docs/en-US/tokenplan/Token%20Plan/quick-access)，在 `.env` 中添加：
 
@@ -76,8 +76,8 @@ XIAOMI_TOKEN_PLAN_CN_API_KEY=你的订阅密钥
 XIAOMI_TOKEN_PLAN_CN_BASE_URL=https://token-plan-cn.xiaomimimo.com/v1
 ```
 
-重启后，「小米 MiMo Token Plan」分组会显示 `mimo-v2.6-pro`、`mimo-v2.6-flash` 和 `mimo-v2.5-pro`。使用 Token Plan 的 `tp-` / `ttp-` 密钥，通过 Chat Completions 接口流式调用；按量计费接口的密钥不能替代订阅密钥。如需设为默认模型，可设置 `PANEL_DEFAULT_MODEL=xiaomi-token-plan-cn/mimo-v2.6-pro`。
+重启后，「小米 MiMo Token Plan」分组会显示 `mimo-v2.6-pro`、`mimo-v2.6-flash` 和 `mimo-v2.5-pro`。使用 Token Plan 的 `tp-` / `ttp-` 密钥，通过 Chat Completions 接口流式调用；按量计费接口的密钥不能替代订阅密钥。如需设为默认模型，可设置 `DREVI_DEFAULT_MODEL=xiaomi-token-plan-cn/mimo-v2.6-pro`。
 
-三款模型的上下文窗口为 1,048,576 tokens；Panel 的本地单次输出预算为 16,384 tokens。v2.6 Pro / Flash 支持图片输入，v2.5 Pro 在 Panel 中使用文本输入。MiMo 的独立思考开关发送 `thinking.type = enabled / disabled`，默认时不发送；没有已确认的独立 effort 档位，因此 effort 保持默认。旧的 off / high 配置分别迁移为关闭 / 开启。工具调用后的历史保留 `reasoning_content`。Token Plan 不显示单次费用估算。
+三款模型的上下文窗口为 1,048,576 tokens；Drevi 的本地单次输出预算为 16,384 tokens。v2.6 Pro / Flash 支持图片输入，v2.5 Pro 在 Drevi 中使用文本输入。MiMo 的独立思考开关发送 `thinking.type = enabled / disabled`，默认时不发送；没有已确认的独立 effort 档位，因此 effort 保持默认。旧的 off / high 配置分别迁移为关闭 / 开启。工具调用后的历史保留 `reasoning_content`。Token Plan 不显示单次费用估算。
 
 搜索服务的可选配置见[网页搜索与网页、PDF 读取](TOOLS.md#网页搜索与网页pdf-读取)。

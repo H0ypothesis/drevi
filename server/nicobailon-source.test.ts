@@ -14,7 +14,7 @@ test("managed native artifact paths follow worktree cwd without remapping arbitr
   );
   assert.equal(adaptNicobailonSource(path.pathname, source), source);
   const engine = await import(
-    `data:text/javascript;base64,${Buffer.from(source).toString("base64")}`
+    `data:text/javascript;base64,${Buffer.from(source.replace(/^\/\/# sourceMappingURL=.*$/gm, "")).toString("base64")}`
   );
   assert.equal(
     engine.resolveSingleOutputPath(

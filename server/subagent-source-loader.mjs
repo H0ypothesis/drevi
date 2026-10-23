@@ -1,5 +1,5 @@
 // Preload only in the source checkout. Detached upstream processes must resolve
-// the same linked Pi packages as Panel before importing their runner entrypoint.
+// the same linked Pi packages as Drevi before importing their runner entrypoint.
 import { registerHooks } from "node:module";
 import { existsSync } from "node:fs";
 import { adaptNicobailonSource } from "./nicobailon-source.mjs";

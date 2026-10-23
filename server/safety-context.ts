@@ -383,7 +383,7 @@ export function compactSafetyContext(
   };
 }
 
-/** A conservative multilingual estimate, matching Panel's context accounting. */
+/** A conservative multilingual estimate, matching Drevi's context accounting. */
 export function safetyContextTokens(text: string) {
   return Math.ceil(text.length * 1.2);
 }

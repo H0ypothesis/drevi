@@ -1,10 +1,12 @@
-# Panel macOS 客户端
+# Drevi macOS 客户端
 
-Panel 现在提供可本地运行的 macOS 应用。原生外壳使用 Swift、AppKit 和 WKWebView，内置独立 Node.js 运行时与生产版前后端，打开应用即可启动本地服务，无需另外运行开发服务器或安装 Node.js。
+Drevi 现在提供可本地运行的 macOS 应用。原生外壳使用 Swift、AppKit 和 WKWebView，内置独立 Node.js 运行时与生产版前后端，打开应用即可启动本地服务，无需另外运行开发服务器或安装 Node.js。
 
 当前构建面向 macOS 13.5 及以上版本，提供原生窗口与菜单、系统文件夹选择器、模型配置入口、应用数据与日志入口。工作台继续使用现有的探索画布、模型调用、工具审批和持久化逻辑。
 
 客户端从与 Web 版相同的 `src/`、`server/` 和 `shared/` 构建，包含画布分支输入卡片、模型上下文容量和路径占用显示，以及文件更新的 Git 记录。Git 快照沿用 Web 版的本机 Git 依赖；应用内置 Node，不内置 Git。
+
+v0.9.9 更名为 **Drevi · 梦络**，更新捕梦网图标和中英文标语。应用标识为 `app.drevi.desktop`，主程序与安装包使用 Drevi 命名。旧版 Panel 用户需先退出旧 App，再手动安装 `Drevi.app`；旧更新器不能跨应用标识升级。Drevi 首次运行优先使用已有的 `~/Library/Application Support/Panel/`（若 Drevi 目录尚不存在），沿用原目录锁，探索、密钥、附件和工作目录保持原路径。新安装使用 `~/Library/Application Support/Drevi/`。由于应用标识变化，电脑预览可能需要重新授予屏幕录制权限。
 
 v0.9.8 调整 max 档位的像素效果，移除卡片和滑杆的整体光晕，让闪烁像素的颜色与发光保持一致。思考强度滑杆、键盘调整、主题和减少动态效果设置继续可用；三段数字版本可由已有 App 的更新器正常识别。
 
@@ -20,8 +22,8 @@ v0.9 包含系统编码沙盒、按目标授权的命令联网、沙盒初始化
 
 ## 首次使用
 
-1. 解压对应架构的 `Panel-mac-arm64.zip` 或 `Panel-mac-x64.zip`，打开其中的 `Panel.app`；也可先将应用移入「应用程序」文件夹。
-2. 等待「正在启动 Panel」结束。客户端会自动启动只监听本机的服务，准备应用自己的数据目录。
+1. 解压对应架构的 `Drevi-mac-arm64.zip` 或 `Drevi-mac-x64.zip`，打开其中的 `Drevi.app`；也可先将应用移入「应用程序」文件夹。
+2. 等待「正在启动 Drevi」结束。客户端会自动启动只监听本机的服务，准备应用自己的数据目录。
 3. 没有模型密钥时，可以用 Pi Demo 体验探索和分支。演示模型使用预设回复，不执行本地或联网工具。
 4. 使用真实模型前，按下一节配置供应商密钥。
 
@@ -42,7 +44,7 @@ v0.9 包含系统编码沙盒、按目标授权的命令联网、沙盒初始化
 
 ## 自动更新（v0.5 起）
 
-App 启动后检查 `H0ypothesis/panel` 的 GitHub Release，之后每 24 小时检查一次；关闭期间不运行后台检查，下次打开时补查。检查时间和已发现的更新会保留，升级到新版本后会重新检查。也可随时点击 Mac 屏幕顶部菜单栏的「Panel → 检查更新…」。左下角版本号旁的更新按钮仅在有更新、操作进行中或需要重试时显示。
+App 启动后检查 `H0ypothesis/drevi` 的 GitHub Release，之后每 24 小时检查一次；关闭期间不运行后台检查，下次打开时补查。检查时间和已发现的更新会保留，升级到新版本后会重新检查。也可随时点击 Mac 屏幕顶部菜单栏的「Drevi → 检查更新…」。左下角版本号旁的更新按钮仅在有更新、操作进行中或需要重试时显示。
 
 v0.5.1 起，GitHub API 限流或连接失败时，会读取同一仓库的公开备用版本信息 `updates/macos.json`。两个来源都不可用时，后台检查保持安静，30 分钟后重试，连续失败逐步延长至 6 小时；如 GitHub 要求更长等待则遵守该时间，成功后恢复每日检查。手动检查或安装失败的气泡可点击关闭、按 Esc 收起，也会在 8 秒后自动收起；按钮保留重试入口。
 
@@ -50,7 +52,7 @@ v0.5.1 起，GitHub API 限流或连接失败时，会读取同一仓库的公�
 
 有运行或排队任务时暂不开始更新，下载结束后还会复查。请等待任务完成或手动停止后再点击。下载或校验失败可点击「重试更新」；替换或启动命令失败时尝试恢复旧 App。安装位置必须可写，磁盘映像或只读目录中的 App 需先移到「应用程序」。
 
-更新源固定为本项目的公开 GitHub Release，无需 GitHub 登录。发布标签应使用 `v0.5`、`v0.5.1` 这样的数字版本，附带对应的 `Panel-mac-arm64.zip` 或 `Panel-mac-x64.zip`，并由 GitHub 提供 `sha256:` 资产摘要。普通数字标签即使标为预览版也会参与检查；草稿、`-beta` / `-rc` 标签、旧的日期型标签、缺少摘要或不匹配架构的安装包会跳过，不会降级。
+更新源固定为本项目的公开 GitHub Release，无需 GitHub 登录。发布标签应使用 `v0.5`、`v0.5.1` 这样的数字版本，附带对应的 `Drevi-mac-arm64.zip` 或 `Drevi-mac-x64.zip`，并由 GitHub 提供 `sha256:` 资产摘要。普通数字标签即使标为预览版也会参与检查；草稿、`-beta` / `-rc` 标签、旧的日期型标签、缺少摘要或不匹配架构的安装包会跳过，不会降级。
 
 开发验证运行 `npm run test:updater`。它覆盖版本选择、下载校验、ZIP 路径与符号链接约束、失败恢复和前端进度交互，使用本地夹具，不替换正在使用的 App。
 
@@ -58,46 +60,46 @@ v0.5.1 起，GitHub API 限流或连接失败时，会读取同一仓库的公�
 
 在工作台打开「模型连接」，点击供应商右侧「未配置」或「已配置」，即可在子页填写 API URL、Key 和 Model。保存后立即生效，无需重启；再次编辑时密钥留空会保留原值。
 
-界面配置保存在 `~/Library/Application Support/Panel/data/model-providers.json`，优先于该供应商的环境配置，密钥不会返回给页面或随探索导出。
+界面配置保存在 `~/Library/Application Support/Drevi/data/model-providers.json`，优先于该供应商的环境配置，密钥不会返回给页面或随探索导出。
 
-选择菜单「Panel → 模型配置…」，或在工作台的「模型连接」中点击「打开高级配置文件」，仍可用文本编辑打开：
+选择菜单「Drevi → 模型配置…」，或在工作台的「模型连接」中点击「打开高级配置文件」，仍可用文本编辑打开：
 
 ```text
-~/Library/Application Support/Panel/.env
+~/Library/Application Support/Drevi/.env
 ```
 
-首次启动会从内置 `.env.example` 创建此文件。按模板填写需要的供应商密钥并保存，再选择「Panel → 重启本地服务…」使配置生效。无需填写所有供应商；模型连接状态可在工作台中查看。仅重新加载页面不会重新读取 `.env`。
+首次启动会从内置 `.env.example` 创建此文件。按模板填写需要的供应商密钥并保存，再选择「Drevi → 重启本地服务…」使配置生效。无需填写所有供应商；模型连接状态可在工作台中查看。仅重新加载页面不会重新读取 `.env`。
 
 客户端将应用文件保存在：
 
 | 内容                       | 位置                                                  |
 | -------------------------- | ----------------------------------------------------- |
-| 模型与工具配置             | `~/Library/Application Support/Panel/.env`            |
-| 探索状态与空间默认工作目录 | `~/Library/Application Support/Panel/data/`           |
-| 探索状态文件               | `~/Library/Application Support/Panel/data/state.json` |
-| 本地服务日志               | `~/Library/Application Support/Panel/server.log`      |
+| 模型与工具配置             | `~/Library/Application Support/Drevi/.env`            |
+| 探索状态与空间默认工作目录 | `~/Library/Application Support/Drevi/data/`           |
+| 探索状态文件               | `~/Library/Application Support/Drevi/data/state.json` |
+| 本地服务日志               | `~/Library/Application Support/Drevi/server.log`      |
 
-「Panel → 显示数据文件夹」打开 `data` 目录；「帮助 → 显示服务日志」定位日志文件。模型密钥由本地服务读取，不会随探索导出。
+「Drevi → 显示数据文件夹」打开 `data` 目录；「帮助 → 显示服务日志」定位日志文件。模型密钥由本地服务读取，不会随探索导出。
 
-客户端的数据和模型配置与源码启动的 Web 版独立。Web 版默认使用项目下的 `.env` 和 `.panel/`，客户端不会自动导入或覆盖它们。两端仍可显式选择同一个本地项目目录；这种情况下，项目文件在磁盘上是共享的。
+客户端的数据和模型配置与源码启动的 Web 版独立。Web 版默认使用项目下的 `.env` 和 `.drevi/`，客户端不会自动导入或覆盖它们。两端仍可显式选择同一个本地项目目录；这种情况下，项目文件在磁盘上是共享的。
 
 ## 电脑操作实时预览
 
 选中正在使用电脑控制的卡片时，默认打开 280×175 的桌面置顶画中画。小窗只有圆角画面，不显示标题栏、边框或红绿灯；平时不会抢走键盘焦点，在其他应用前台工作时仍可观看。拖动画面可移动位置，拖动右下角可调节大小，尺寸会保留。鼠标移到画面上时显示白色控件：左上角关闭画中画，中间进入被控制应用的当前窗口（浏览器同时切到对应标签页），左侧刷新画面，右侧中止当前任务。进入应用只使用服务端当前任务的有效目标；任务版本或目标变化后，旧预览不能激活其他窗口。卡片上的「实时预览」按钮控制开关，关闭偏好会保留。切换卡片、目标释放、任务结束或服务重启都会停止旧画面的采集。关闭主窗口会保留正在运行任务的预览，关闭预览本身不会停止任务。
 
-原生窗口使用 ScreenCaptureKit 按精确的进程和窗口连续采集，最高 15 FPS。首次使用需在预览窗点击「授权屏幕录制」，为 **Panel** 授权；已有的 Cua Driver 屏幕录制授权属于另一个应用，不能代替 Panel 授权。系统要求重新打开应用时，先完成或停止当前任务再重启。预览采集不录音。
+原生窗口使用 ScreenCaptureKit 按精确的进程和窗口连续采集，最高 15 FPS。首次使用需在预览窗点击「授权屏幕录制」，为 **Drevi** 授权；已有的 Cua Driver 屏幕录制授权属于另一个应用，不能代替 Drevi 授权。系统要求重新打开应用时，先完成或停止当前任务再重启。预览采集不录音。
 
 Chromium 页面使用独立的 CDP 画面连接，跟随已经观察的目标页面，无需切换标签页，不刷新模型的 DOM 引用。当前驱动不公开 CDP 页面 ID，因此只能对其进程中可唯一对应到已观察网址的页面启用连续预览；相同网址存在多个标签页、端点无法证明属于该进程或页面连接断开时，会提示暂不可用，任务继续运行。可关闭重复页面或让模型使用独立的浏览器实例后重新连接。
 
-桌面画中画通过第二路 ScreenCaptureKit 视频采集 Cua Driver 的真实透明悬浮层，以 30 FPS 裁切到目标窗口后叠在应用画面上。指针、会话颜色、键入、按键、点击、滚动、拖动、浮动及淡出动画全部来自驱动原生像素，Panel 不再自行绘制或模拟。采集只接受服务端持有的驱动进程身份，并核对应用 Bundle 与唯一悬浮窗口，不采集整张桌面。窗口移动时会更新裁切位置；目标切换、会话失效或断线后立即停止旧采集。Chromium 预览额外只读验证页面可见性，只有当前可见标签才叠加原生层；后台标签保持 CDP 画面，原生驱动未显示的光标也不会额外生成。
+桌面画中画通过第二路 ScreenCaptureKit 视频采集 Cua Driver 的真实透明悬浮层，以 30 FPS 裁切到目标窗口后叠在应用画面上。指针、会话颜色、键入、按键、点击、滚动、拖动、浮动及淡出动画全部来自驱动原生像素，Drevi 不再自行绘制或模拟。采集只接受服务端持有的驱动进程身份，并核对应用 Bundle 与唯一悬浮窗口，不采集整张桌面。窗口移动时会更新裁切位置；目标切换、会话失效或断线后立即停止旧采集。Chromium 预览额外只读验证页面可见性，只有当前可见标签才叠加原生层；后台标签保持 CDP 画面，原生驱动未显示的光标也不会额外生成。
 
 Web 版提供页面内可拖动和缩放的预览，浏览器目标使用同一 CDP 画面源，原生窗口降级为独立会话的图片采样。真实 macOS 悬浮层采集由桌面客户端完成，独立 Web 页面不绘制替代光标。所有预览帧及可见性状态仅在实时连接中传输，不加入模型上下文、探索记录或导出文件。
 
 ## 关闭、退出与重启
 
-关闭窗口或按 `⌘W` 会保留应用和本地服务，已有任务继续运行。点击 Dock 中的 Panel 图标可重新打开窗口。
+关闭窗口或按 `⌘W` 会保留应用和本地服务，已有任务继续运行。点击 Dock 中的 Drevi 图标可重新打开窗口。
 
-「Panel → 退出 Panel」或 `⌘Q` 会保存探索并停止本地服务。如果仍有运行中或排队中的任务，会先提示确认。重启本地服务也会检查这些任务，并在需要时提示确认。
+「Drevi → 退出 Drevi」或 `⌘Q` 会保存探索并停止本地服务。如果仍有运行中或排队中的任务，会先提示确认。重启本地服务也会检查这些任务，并在需要时提示确认。
 
 退出或重启会中断尚未完成的任务，已经发生的项目文件修改会保留，不会回滚。再次启动不会自动重放中断的模型请求。工作台内的工具审批规则仍然生效，命令依旧在本机执行。
 
@@ -117,28 +119,28 @@ npm ci --ignore-scripts
 npm run setup:pi
 ```
 
-应用内置的 Node 必须是与当前构建进程及依赖相同架构的官方 macOS 独立版本。Apple Silicon 使用 `arm64`，Intel 使用 `x64`。将官方 Node 压缩包解压后，设置 `PANEL_NODE_BINARY` 指向其中的 `bin/node`：
+应用内置的 Node 必须是与当前构建进程及依赖相同架构的官方 macOS 独立版本。Apple Silicon 使用 `arm64`，Intel 使用 `x64`。将官方 Node 压缩包解压后，设置 `DREVI_NODE_BINARY` 指向其中的 `bin/node`：
 
 ```bash
-PANEL_NODE_BINARY="/absolute/path/to/node-v24.19.0-darwin-arm64/bin/node" npm run build:mac
+DREVI_NODE_BINARY="/absolute/path/to/node-v24.19.0-darwin-arm64/bin/node" npm run build:mac
 npm run test:desktop
 ```
 
-`PANEL_NODE_BINARY` 未设置时，构建脚本使用当前执行 npm 的 Node。脚本会检查 Node 版本、架构和动态库依赖；依赖 Homebrew 等外部动态库的 Node 会被拒绝，避免生成只能在构建机上启动的应用。
+`DREVI_NODE_BINARY` 未设置时，构建脚本使用当前执行 npm 的 Node。脚本会检查 Node 版本、架构和动态库依赖；依赖 Homebrew 等外部动态库的 Node 会被拒绝，避免生成只能在构建机上启动的应用。
 
-构建会随应用保留 Node 许可证。`PANEL_NODE_LICENSE` 默认指向 Node 安装目录的 `LICENSE`，即从 `bin` 目录解析 `../LICENSE`；文件位于其他位置时可显式指定：
+构建会随应用保留 Node 许可证。`DREVI_NODE_LICENSE` 默认指向 Node 安装目录的 `LICENSE`，即从 `bin` 目录解析 `../LICENSE`；文件位于其他位置时可显式指定：
 
 ```bash
-PANEL_NODE_BINARY="/absolute/path/to/bin/node" \
-PANEL_NODE_LICENSE="/absolute/path/to/LICENSE" \
+DREVI_NODE_BINARY="/absolute/path/to/bin/node" \
+DREVI_NODE_LICENSE="/absolute/path/to/LICENSE" \
 npm run build:mac
 ```
 
 `npm run build:mac` 依次构建 Web 资源、打包独立后端及运行依赖、编译原生外壳并生成应用图标，最后进行本地 ad-hoc 签名和签名验证。产物为：
 
 ```text
-release/Panel.app
-release/Panel-mac-arm64.zip   # 或 Panel-mac-x64.zip
+release/Drevi.app
+release/Drevi-mac-arm64.zip   # 或 Drevi-mac-x64.zip
 release/build-info.json
 ```
 
@@ -149,14 +151,14 @@ ZIP 不携带资源分支和扩展属性，避免生成大量 `__MACOSX` 条目�
 发布新版本并确认安装包已公开、可下载后，同步备用更新信息（标签替换为本次版本）：
 
 ```bash
-gh api repos/H0ypothesis/panel/releases/tags/v0.9.8 > build/published-release.json
+gh api repos/H0ypothesis/drevi/releases/tags/v0.9.9 > build/published-release.json
 node scripts/update-release-feed.mjs build/published-release.json
 git add updates/macos.json
 git commit -m "chore: refresh public macOS update feed"
 git push origin main
 ```
 
-脚本只接受已发布的数字版本和带 GitHub SHA-256 摘要的本仓库安装包，保留最近 20 个版本；备用源的架构、版本、大小、下载地址与摘要验证和 API 来源相同。不要在安装包公开前更新此文件。v0.5 若因 API 限流无法自动升级，需要从 Release 手动下载一次当前版本 v0.9.8。
+脚本只接受已发布的数字版本和带 GitHub SHA-256 摘要的本仓库安装包，保留最近 20 个版本；备用源的架构、版本、大小、下载地址与摘要验证和 API 来源相同。不要在安装包公开前更新此文件。v0.5 若因 API 限流无法自动升级，需要从 Release 手动下载一次当前版本 v0.9.9。
 
 ## 验证记录与发布状态
 
@@ -181,6 +183,6 @@ v0.9 实际验证使用 Apple Silicon `arm64`、独立 Node.js `24.19.0`，最�
 - 使用打包后的 Node 和应用资源运行 `scripts/test-native-host.mjs`：原生子代理后台执行与嵌套执行通过。
 - ZIP 完整性、所需运行时文件和深层代码签名验证通过；应用版本为 `0.9.0`，构建源码与发布提交一致，具体提交记录在 `build-info.json`。
 
-`test:desktop` 默认直接使用已构建 `Panel.app` 内的运行时，在隔离临时目录中测试，不继承实际模型密钥或使用现有探索数据；它不替代原生界面的交互验收。
+`test:desktop` 默认直接使用已构建 `Drevi.app` 内的运行时，在隔离临时目录中测试，不继承实际模型密钥或使用现有探索数据；它不替代原生界面的交互验收。
 
 当前产物采用本地 ad-hoc 签名，尚未接入 Developer ID 签名或 Apple 公证，属于预览版。v0.5 起提供上述 GitHub Release 更新功能；签名校验用于检查包的完整性，发布来源由固定仓库的 HTTPS 地址和 GitHub 资产摘要约束。

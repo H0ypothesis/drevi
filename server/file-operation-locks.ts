@@ -92,7 +92,7 @@ class ResourcePathEnv extends NodeExecutionEnv {
 
 /**
  * Reuse Pi's complete tool-path normalization, including @, Unicode spaces,
- * home/file URLs and read filename variants, with Panel's directory boundary.
+ * home/file URLs and read filename variants, with Drevi's directory boundary.
  */
 export async function resolveFileOperationResource(
   cwd: string,

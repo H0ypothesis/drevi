@@ -44,7 +44,7 @@ test("native update badge handles availability, progress, failure, retry and com
   const closeChannels = channelsFor(window);
   let installs = 0,
     checks = 0;
-  window.panelDesktop = {
+  window.dreviDesktop = {
     platform: "macos",
     getUpdateState: async () => ({ phase: "available", version: "v0.6" }),
     installUpdate: async () => {
@@ -71,7 +71,7 @@ test("native update badge handles availability, progress, failure, retry and com
   const state = (value) =>
     act(() =>
       window.dispatchEvent(
-        new window.CustomEvent("panel:update-state", { detail: value }),
+        new window.CustomEvent("drevi:update-state", { detail: value }),
       ),
     );
   assert.match(button().textContent, /有更新/);
@@ -116,7 +116,7 @@ test("check errors dismiss by close, Escape or timeout and retry checks even wit
     }
     return realTimeout(callback, delay, ...args);
   };
-  window.panelDesktop = {
+  window.dreviDesktop = {
     platform: "macos",
     getUpdateState: async () => ({ phase: "idle" }),
     installUpdate: async () => {
@@ -140,7 +140,7 @@ test("check errors dismiss by close, Escape or timeout and retry checks even wit
   const error = () =>
     act(() =>
       window.dispatchEvent(
-        new window.CustomEvent("panel:update-state", {
+        new window.CustomEvent("drevi:update-state", {
           detail: {
             phase: "error",
             operation: "check",

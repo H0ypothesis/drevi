@@ -12,7 +12,7 @@ import { Scheduler } from "./scheduler.ts";
 import { Store } from "./store.ts";
 
 async function setup(t: TestContext) {
-  const directory = await mkdtemp(join(tmpdir(), "panel-provider-settings-"));
+  const directory = await mkdtemp(join(tmpdir(), "drevi-provider-settings-"));
   const envNames = [...new Set(modelProviders.flatMap((item) => item.keys))];
   const before = envNames.map((name) => [name, process.env[name]] as const);
   for (const name of envNames) delete process.env[name];

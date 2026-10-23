@@ -616,7 +616,7 @@ export function ToolCallCard({
                 title={
                   batchApprovalAvailable
                     ? `同意此卡片本轮所有「${label}」操作，运行结束后失效`
-                    : "重启 Panel 服务后可使用批量同意"
+                    : "重启 Drevi 服务后可使用批量同意"
                 }
                 onClick={() => void decide("approve_tool")}
               >
@@ -627,7 +627,7 @@ export function ToolCallCard({
           </div>
           {allowsBatch && !batchApprovalAvailable && (
             <p className="tool-batch-hint">
-              批量同意将在 Panel 服务重启后可用。
+              批量同意将在 Drevi 服务重启后可用。
             </p>
           )}
         </div>

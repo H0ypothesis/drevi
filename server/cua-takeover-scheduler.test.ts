@@ -61,7 +61,7 @@ async function fixture(
   concurrency = Infinity,
 ) {
   const directory = await realpath(
-    await mkdtemp(join(tmpdir(), "panel-takeover-")),
+    await mkdtemp(join(tmpdir(), "drevi-takeover-")),
   );
   const project = join(directory, "project");
   await mkdir(project);

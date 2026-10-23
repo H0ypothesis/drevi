@@ -30,12 +30,12 @@ for (const { modelId, reply, contextWindow } of [
   const supportsImages = modelId === "z-ai/glm-5.3-flash";
   test(`Paperbypass streams ${modelId} with Messages routing and server-side Bearer auth`, async (t) => {
     const configId = `paperbypass/${modelId}`;
-    const dummyKey = "sk-panel-local-mock-key";
+    const dummyKey = "sk-drevi-local-mock-key";
     const envNames = [
       "PAPERBYPASS_API_KEY",
       "PAPERBYPASS_BASE_URL",
       "PAPERBYPASS_MODEL",
-      "PANEL_DEFAULT_MODEL",
+      "DREVI_DEFAULT_MODEL",
       "ATRIA_API_KEY",
     ] as const;
     const previousEnv = new Map(
@@ -133,7 +133,7 @@ for (const { modelId, reply, contextWindow } of [
     process.env.PAPERBYPASS_BASE_URL = `${origin}/api/`;
     delete process.env.PAPERBYPASS_MODEL;
     delete process.env.ATRIA_API_KEY;
-    process.env.PANEL_DEFAULT_MODEL = configId;
+    process.env.DREVI_DEFAULT_MODEL = configId;
 
     const runtime = new PiRuntime();
     const models = runtime.models();

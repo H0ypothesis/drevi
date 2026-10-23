@@ -119,7 +119,7 @@ test("new streaming output supersedes old raw usage and final raw counters repla
 
 test("snapshots expose measured usage for existing runs without changing or exposing transcripts", () => {
   const store = new Store(
-    join(tmpdir(), "panel-request-context-snapshot-test"),
+    join(tmpdir(), "drevi-request-context-snapshot-test"),
   );
   const workspace = createWorkspace("Root", "Background");
   const node: StoredNode = {

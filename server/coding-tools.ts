@@ -47,7 +47,7 @@ const DEFAULT_COMMAND_TIMEOUT = 120;
 const MAX_COMMAND_TIMEOUT = 600;
 
 // The Pi file mutation queue is scoped to an environment. Sharing it by canonical
-// cwd serializes edits to the same file across concurrent Panel branches.
+// cwd serializes edits to the same file across concurrent Drevi branches.
 const environments = new Map<string, WorkspaceExecutionEnv>();
 const sandboxTools = new WeakSet<object>();
 const executionNotices = new WeakSet<object>();
@@ -206,7 +206,7 @@ class WorkspaceExecutionEnv extends NodeExecutionEnv {
               return runSandbox(await prepare(), assertAuthorized);
             if (action !== "host") throw new Error("无效的沙盒恢复选择。");
             const temporary = await realpath(
-              await mkdtemp(join(tmpdir(), "panel-host-")),
+              await mkdtemp(join(tmpdir(), "drevi-host-")),
             );
             try {
               return await run(command, temporary, assertAuthorized);
@@ -373,8 +373,8 @@ function adaptTool<TParameters extends TSchema, TDetails>(
   };
 }
 
-/** Reuse Pi's native tools; Panel supplies containment and approval separately. */
-export function createPanelTools(
+/** Reuse Pi's native tools; Drevi supplies containment and approval separately. */
+export function createDreviTools(
   cwd: string,
   requestNetwork?: NetworkPermission,
   sandboxOptions?: CodingSandboxOptions,
