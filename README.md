@@ -25,12 +25,12 @@
 从同一个问题出发，沿不同方向继续追问，让多个模型并行探索，再把有价值的分支汇合。每轮对话保留自己的问题、回答与上下文路径，你可以随时回到之前的节点，继续一个新的想法。
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/workbench-dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="docs/assets/workbench.png">
-  <img src="docs/assets/workbench.png" alt="Drevi 工作台：左侧探索列表、中间分支画布与全局缩略图、右侧对话阅读和分支输入区">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/workbench-macos-dark.jpg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/workbench-macos-light.jpg">
+  <img src="docs/assets/workbench-macos-light.jpg" alt="Drevi 工作台：左侧探索列表、中间分支画布与全局缩略图、右侧对话阅读和分支输入区">
 </picture>
 
-<p align="center">当前版本实拍 · Pi Demo 示例探索 · <a href="docs/assets/workbench.png">浅色预览</a> / <a href="docs/assets/workbench-dark.png">深色预览</a></p>
+<p align="center">macOS 原生截图 · 2880 × 1840 · Pi Demo 示例探索 · <a href="docs/assets/workbench-macos-light.jpg">浅色原图</a> / <a href="docs/assets/workbench-macos-dark.jpg">深色原图</a></p>
 
 ## 用 Drevi 做什么
 
