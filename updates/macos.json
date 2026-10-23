@@ -1,5 +1,21 @@
 {
   "schemaVersion": 1,
   "repository": "H0ypothesis/drevi",
-  "releases": []
+  "releases": [
+    {
+      "tag_name": "v0.9.9",
+      "draft": false,
+      "prerelease": true,
+      "published_at": "2026-10-23T04:04:05Z",
+      "assets": [
+        {
+          "name": "Drevi-mac-arm64.zip",
+          "state": "uploaded",
+          "size": 335892079,
+          "digest": "sha256:3b6c9486f7149684c644c16c1480447eb43357a43a266acdf49b946c22621c79",
+          "browser_download_url": "https://github.com/H0ypothesis/drevi/releases/download/v0.9.9/Drevi-mac-arm64.zip"
+        }
+      ]
+    }
+  ]
 }
