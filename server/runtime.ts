@@ -306,6 +306,7 @@ function summaryUsage(usage: Usage, provider: string): TurnNode["usage"] {
     output: usage.output,
     total: usage.totalTokens,
     cost:
+      provider === "custom" ||
       provider === "paperbypass" ||
       provider === "atria" ||
       provider === "xiaomi-token-plan-cn"
@@ -1417,6 +1418,7 @@ export class PiRuntime implements Runtime {
                   childUsage?.total ?? 0,
                 ),
                 cost:
+                  provider === "custom" ||
                   provider === "paperbypass" ||
                   provider === "atria" ||
                   provider === "xiaomi-token-plan-cn"

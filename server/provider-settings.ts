@@ -28,12 +28,16 @@ import type {
   ModelThinkingSettings,
   ThinkingProbeResult,
 } from "../shared/provider-settings.ts";
-import { validContextWindow } from "../shared/provider-settings.ts";
+import {
+  providerProtocols,
+  validContextWindow,
+} from "../shared/provider-settings.ts";
 import { discoverModels } from "./model-discovery.ts";
 import { probeThinking, thinkingProbeContext } from "./thinking-probe.ts";
 import { paperbypassProvider } from "./paperbypass.ts";
 import { atriaProvider } from "./atria.ts";
 import { xiaomiTokenPlanProvider } from "./xiaomi.ts";
+import { customProvider } from "./custom-provider.ts";
 import {
   effortApi,
   thinkingCapabilities,
@@ -45,6 +49,14 @@ import {
 } from "./model-thinking.ts";
 
 export const modelProviders = [
+  {
+    id: "custom",
+    name: "通用接口",
+    env: "CUSTOM_API_KEY",
+    keys: ["CUSTOM_API_KEY"],
+    defaultModel: "",
+    create: customProvider,
+  },
   {
     id: "xiaomi-token-plan-cn",
     name: "小米 MiMo Token Plan",
@@ -165,23 +177,29 @@ function validateConnection(input: unknown) {
   return { baseUrl: baseUrl.replace(/\/+$/, ""), apiKey };
 }
 
-function validateSettings(input: unknown) {
+function validateProtocol(
+  value: unknown,
+  id: string,
+): ProviderProtocol | undefined {
+  if (id === "custom" && value === "auto") return "openai-completions";
+  if (
+    value !== undefined &&
+    value !== "auto" &&
+    !providerProtocols(id).includes(value as ProviderProtocol)
+  )
+    throw new Error("此服务商不支持所选接口协议。");
+  return value as ProviderProtocol | undefined;
+}
+
+function validateSettings(input: unknown, id: string) {
   const connection = validateConnection(input);
   const fields = input as Record<string, unknown>;
   const model = textField(fields.model, "Model ID", 240);
   if (/\s/.test(model)) throw new Error("Model ID 不能包含空白字符。");
-  if (
-    fields.protocol !== undefined &&
-    (typeof fields.protocol !== "string" ||
-      !["auto", "openai-completions", "openai-responses"].includes(
-        fields.protocol,
-      ))
-  )
-    throw new Error("接口协议设置无效。");
   return {
     ...connection,
     model,
-    protocol: fields.protocol as ProviderProtocol | undefined,
+    protocol: validateProtocol(fields.protocol, id),
   };
 }
 
@@ -213,17 +231,12 @@ export class ModelProviderSettings {
       for (const entry of parsed.providers) {
         if (!entry || !modelProviders.some((item) => item.id === entry.id))
           throw new Error("Invalid provider");
-        const value = validateSettings(entry);
-        if (
-          entry.id !== "openai" &&
-          value.protocol &&
-          value.protocol !== "auto"
-        )
-          throw new Error("Invalid protocol");
+        const value = validateSettings(entry, entry.id);
         if (!Array.isArray(entry.customModels))
           throw new Error("Invalid models");
         const customModels = entry.customModels.map(
-          (id: unknown) => validateSettings({ ...value, model: id }).model,
+          (id: unknown) =>
+            validateSettings({ ...value, model: id }, entry.id).model,
         );
         if (
           entry.modelContexts !== undefined &&
@@ -241,7 +254,8 @@ export class ModelProviderSettings {
             )
               throw new Error("Invalid model context");
             return {
-              id: validateSettings({ ...value, model: item.id }).model,
+              id: validateSettings({ ...value, model: item.id }, entry.id)
+                .model,
               contextWindow: item.contextWindow,
             };
           },
@@ -253,7 +267,7 @@ export class ModelProviderSettings {
           throw new Error("Invalid model thinking");
         const modelThinking = (entry.modelThinking ?? []).map(
           (item: { id?: unknown; settings?: unknown }) => ({
-            id: validateSettings({ ...value, model: item?.id }).model,
+            id: validateSettings({ ...value, model: item?.id }, entry.id).model,
             settings: validateThinking(item?.settings, entry.id),
           }),
         );
@@ -290,14 +304,12 @@ export class ModelProviderSettings {
   ): Promise<ThinkingProbeResult> {
     if (this.probes.has(id))
       throw new Error("此服务商已有检测正在进行，请稍后重试。");
-    const value = validateSettings(input);
+    const value = validateSettings(input, id);
     const format = (input as Record<string, unknown>).format;
     if (
       !thinkingFormats(id).includes(format as ModelThinkingSettings["format"])
     )
       throw new Error("请选择支持的检测参数格式。");
-    if (id !== "openai" && value.protocol && value.protocol !== "auto")
-      throw new Error("此服务商不支持修改接口协议。");
     const definition = modelProviders.find((provider) => provider.id === id)!;
     const previous = this.saved.get(id);
     if (
@@ -342,6 +354,9 @@ export class ModelProviderSettings {
     const definition = modelProviders.find((item) => item.id === id);
     if (!definition) throw new Error("不支持此模型服务商。");
     const value = validateConnection(input);
+    const protocol =
+      validateProtocol((input as Record<string, unknown>).protocol, id) ??
+      this.saved.get(id)?.protocol;
     const configuredUrl = this.registry
       .getProvider(id)
       ?.baseUrl?.replace(/\/+$/, "");
@@ -351,7 +366,10 @@ export class ModelProviderSettings {
       );
     let key = value.apiKey ?? this.saved.get(id)?.apiKey;
     let bearer =
-      id === "paperbypass" || id === "openai" || id === "xiaomi-token-plan-cn";
+      id === "paperbypass" ||
+      id === "openai" ||
+      id === "xiaomi-token-plan-cn" ||
+      (id === "custom" && protocol !== "anthropic-messages");
     if (!key && id === "anthropic") {
       key = process.env.ANTHROPIC_AUTH_TOKEN?.trim();
       bearer = Boolean(key);
@@ -368,7 +386,8 @@ export class ModelProviderSettings {
         ? "google"
         : id === "paperbypass"
           ? "paperbypass"
-          : ["anthropic", "atria"].includes(id)
+          : ["anthropic", "atria"].includes(id) ||
+              (id === "custom" && protocol === "anthropic-messages")
             ? "anthropic"
             : "openai";
     const headers: Record<string, string> =
@@ -463,8 +482,12 @@ export class ModelProviderSettings {
         supportsContextWindow: true,
         thinkingFormats: thinkingFormats(definition.id),
         supportsThinkingProbe: thinkingFormats(definition.id).length > 0,
-        ...(definition.id === "openai"
-          ? { protocol: this.saved.get(definition.id)?.protocol ?? "auto" }
+        ...(providerProtocols(definition.id).length
+          ? {
+              protocol:
+                this.saved.get(definition.id)?.protocol ??
+                (definition.id === "custom" ? "openai-completions" : "auto"),
+            }
           : {}),
         models,
       };
@@ -475,7 +498,7 @@ export class ModelProviderSettings {
     const operation = this.writes.then(async () => {
       const definition = modelProviders.find((item) => item.id === id);
       if (!definition) throw new Error("不支持此模型服务商。");
-      const value = validateSettings(input);
+      const value = validateSettings(input, id);
       const rawThinking = (input as Record<string, unknown>).thinking;
       const thinking =
         rawThinking == null ? rawThinking : validateThinking(rawThinking, id);
@@ -488,8 +511,6 @@ export class ModelProviderSettings {
         throw new Error(
           "上下文长度必须是 1024 到 100000000 之间的整数（tokens）。",
         );
-      if (id !== "openai" && value.protocol && value.protocol !== "auto")
-        throw new Error("此服务商不支持修改接口协议。");
       const previous = this.saved.get(id);
       const apiKey = value.apiKey ?? previous?.apiKey;
       if (!apiKey && !definition.keys.some((key) => process.env[key]?.trim()))
@@ -588,7 +609,9 @@ export class ModelProviderSettings {
           id,
           name: id,
           provider: provider.id,
-          api: provider.id === "openai" ? "openai-completions" : models[0]!.api,
+          api: ["openai", "custom"].includes(provider.id)
+            ? "openai-completions"
+            : models[0]!.api,
           baseUrl: settings.baseUrl,
           reasoning: false,
           input: ["text"],
@@ -607,7 +630,7 @@ export class ModelProviderSettings {
         if (model) model.contextWindow = contextWindow;
       }
       if (
-        provider.id === "openai" &&
+        providerProtocols(provider.id).length &&
         settings.protocol &&
         settings.protocol !== "auto"
       ) {
@@ -615,6 +638,13 @@ export class ModelProviderSettings {
           if (model.api !== settings.protocol) delete model.compat;
           model.api = settings.protocol;
         }
+      }
+      // The Anthropic SDK appends /v1/messages itself. Preserve the user's
+      // connection URL for settings/discovery, but avoid /v1/v1 in requests.
+      if (provider.id === "custom") {
+        for (const model of models)
+          if (model.api === "anthropic-messages")
+            model.baseUrl = model.baseUrl.replace(/\/v1$/, "");
       }
       const configured = createProvider({
         ...provider,

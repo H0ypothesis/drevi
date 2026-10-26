@@ -16,11 +16,13 @@ import type {
   ProviderModelCatalog,
   ModelThinkingSettings,
   ThinkingFormat,
+  ProviderProtocol,
 } from "../shared/provider-settings";
 import {
   MAX_CONTEXT_WINDOW,
   validContextWindow,
   effortLevels,
+  providerProtocols,
 } from "../shared/provider-settings";
 import { api } from "./api";
 import { ProviderModelPicker } from "./ProviderModelPicker";
@@ -54,9 +56,8 @@ export function ProviderSettingsDialog({
   const [baseUrl, setBaseUrl] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [model, setModel] = useState("");
-  const [protocol, setProtocol] = useState<
-    "auto" | "openai-completions" | "openai-responses"
-  >("auto");
+  const [protocol, setProtocol] = useState<ProviderProtocol>("auto");
+  const protocols = providerProtocols(providerId);
   const [visibleKey, setVisibleKey] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -121,6 +122,7 @@ export function ProviderSettingsDialog({
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 baseUrl: normalizedUrl,
+                ...(providerId === "custom" ? { protocol } : {}),
                 ...(apiKey.trim() ? { apiKey: apiKey.trim() } : {}),
               }),
               signal: controller.signal,
@@ -155,6 +157,7 @@ export function ProviderSettingsDialog({
     loading,
     settings,
     providerId,
+    protocol,
     normalizedUrl,
     apiKey,
     canDiscover,
@@ -186,7 +189,10 @@ export function ProviderSettingsDialog({
         setSettings(provider);
         setBaseUrl(provider.baseUrl);
         setModel(provider.model);
-        setProtocol(provider.protocol ?? "auto");
+        setProtocol(
+          provider.protocol ??
+            (providerId === "custom" ? "openai-completions" : "auto"),
+        );
       })
       .catch((reason) => {
         if (current)
@@ -255,7 +261,7 @@ export function ProviderSettingsDialog({
         {
           baseUrl: baseUrl.trim(),
           model: model.trim(),
-          ...(providerId === "openai" ? { protocol } : {}),
+          ...(protocols.length ? { protocol } : {}),
           ...(apiKey.trim() ? { apiKey: apiKey.trim() } : {}),
           ...(contextWindow !== undefined ? { contextWindow } : {}),
           ...(thinkingOverride !== undefined
@@ -307,7 +313,9 @@ export function ProviderSettingsDialog({
           <div>
             <h2 id="provider-settings-title">配置 {providerName}</h2>
             <p className="modal-intro" id="provider-settings-description">
-              连接模型，设置对话中可用的思考选项。
+              {providerId === "custom"
+                ? "连接 OpenRouter 或其他兼容服务，自定义地址、协议和模型。"
+                : "连接模型，设置对话中可用的思考选项。"}
             </p>
           </div>
         </div>
@@ -335,7 +343,11 @@ export function ProviderSettingsDialog({
                     autoComplete="off"
                     spellCheck={false}
                     value={baseUrl}
-                    placeholder="https://api.example.com/v1"
+                    placeholder={
+                      providerId === "custom"
+                        ? "https://openrouter.ai/api/v1"
+                        : "https://api.example.com/v1"
+                    }
                     onChange={(event) => {
                       setBaseUrl(event.target.value);
                       setContextOverride(null);
@@ -347,7 +359,36 @@ export function ProviderSettingsDialog({
                 <p className="provider-field-hint" id="provider-url-hint">
                   填写 API 基础地址，不包含具体请求路径（如
                   /chat/completions）。
+                  {providerId === "custom" &&
+                    "OpenRouter 填写 https://openrouter.ai/api/v1，选择 Chat Completions。"}
                 </p>
+                {protocols.length > 0 && (
+                  <label className="form-label" htmlFor="provider-protocol">
+                    接口协议
+                    <select
+                      id="provider-protocol"
+                      value={protocol}
+                      onChange={(event) =>
+                        setProtocol(event.target.value as typeof protocol)
+                      }
+                    >
+                      {protocols.map((value) => (
+                        <option key={value} value={value}>
+                          {
+                            {
+                              auto: "自动（内置 Responses / 自定义 Chat Completions）",
+                              "openai-completions":
+                                "Chat Completions（/chat/completions）",
+                              "openai-responses": "Responses（/responses）",
+                              "anthropic-messages":
+                                "Anthropic Messages（/messages）",
+                            }[value]
+                          }
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
                 <label
                   className="form-label provider-key-label"
                   htmlFor="provider-api-key"
@@ -493,26 +534,6 @@ export function ProviderSettingsDialog({
                           ? "来源：内置模型目录"
                           : "模型上限未知；当前使用 128,000 tokens 本地兜底预算。"}
                 </p>
-                {providerId === "openai" && (
-                  <label className="form-label" htmlFor="provider-protocol">
-                    接口协议
-                    <select
-                      id="provider-protocol"
-                      value={protocol}
-                      onChange={(event) =>
-                        setProtocol(event.target.value as typeof protocol)
-                      }
-                    >
-                      <option value="auto">
-                        自动（内置 Responses / 自定义 Chat Completions）
-                      </option>
-                      <option value="openai-completions">
-                        Chat Completions（兼容接口）
-                      </option>
-                      <option value="openai-responses">Responses</option>
-                    </select>
-                  </label>
-                )}
               </section>
             </fieldset>
             <div className="provider-capabilities">
@@ -711,7 +732,7 @@ export function ProviderSettingsDialog({
                     baseUrl: normalizedUrl,
                     model: model.trim(),
                     ...(apiKey.trim() ? { apiKey: apiKey.trim() } : {}),
-                    ...(providerId === "openai" ? { protocol } : {}),
+                    ...(protocols.length ? { protocol } : {}),
                     format:
                       thinkingValue?.format ??
                       savedModel?.thinkingFormat ??

@@ -10,7 +10,11 @@ Web 版和 macOS 应用均可直接在界面中配置模型。macOS 应用的文
 2. 在配置子页填写 API URL 和 API Key，稍作停顿后会自动获取模型列表。URL 为服务商提供的 API 基础地址，不包含 `/chat/completions` 等具体请求路径；地址需要支持所选供应商的接口协议。点击 Model 输入框可浏览、搜索并选择模型，也可手动填写完整模型 ID。
 3. 点击「保存配置」，模型列表立即更新，无需重启。保存表示配置已写入本机，不代表已向供应商验证连接。
 
-OpenAI 可选择接口协议：自动模式下，内置模型使用 Responses，自定义模型使用 Chat Completions；使用仅支持 Chat Completions 的兼容网关时，选择「Chat Completions（兼容接口）」。自定义模型采用文本输入，思考使用服务默认；没有发送思考参数不代表服务端关闭思考。
+列表顶部的「通用接口」可连接 OpenRouter 或其他兼容服务，自定义 API URL、API Key 和完整模型 ID。默认使用 Chat Completions，也可选择 Responses 或 Anthropic Messages；请按服务商支持的协议选择，模型名称不会决定接口协议。通用连接独立保存，不占用 OpenAI 等内置供应商配置。
+
+以 [OpenRouter](https://openrouter.ai/docs/quickstart) 为例：API URL 填写 `https://openrouter.ai/api/v1`，使用 OpenRouter 的 API Key，协议选择「Chat Completions」，再从获取的列表中选择模型或手动填写完整 ID（保留 `厂商/模型` 前缀）。目录中的 `context_length` 会自动带入上下文预算。当前通用入口保存一个服务地址，可在该地址下逐个添加并保留多个模型。
+
+OpenAI 可选择接口协议：自动模式下，内置模型使用 Responses，自定义模型使用 Chat Completions；使用仅支持 Chat Completions 的兼容网关时，选择「Chat Completions」。Anthropic、Atria 和 Paperbypass 使用 Messages，小米 MiMo 使用 Chat Completions，Google 使用 Gemini 接口。自定义模型采用文本输入，思考使用服务默认；没有发送思考参数不代表服务端关闭思考。
 
 「上下文长度（tokens）」可设置当前模型的本地上下文预算，提供 128K、256K、512K、1M 快捷选项（十进制，1K = 1,000、1M = 1,000,000 tokens），也可手动填写精确整数。目录返回有效 `contextWindow` 时自动带入并保留原始数值；未提供或返回 `null` 时保持未知，自定义模型暂用 128,000 tokens 兜底，并在对话模型选择器标为「预算 128K」，不代表真实模型上限。可根据服务商文档填写准确数值，保存后界面与后端压缩使用同一预算，按服务地址和模型分别保留；更换 URL 不继承旧地址的配置。清空该字段并保存可恢复默认。已完成对话的用量环保留当时运行的预算，新设置不会改写历史记录。
 

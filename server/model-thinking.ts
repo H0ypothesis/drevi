@@ -96,7 +96,7 @@ function nativeIndependentEffortFormat(
 }
 
 export function thinkingFormats(provider: string): ThinkingFormat[] {
-  if (["paperbypass", "atria"].includes(provider))
+  if (["custom", "paperbypass", "atria"].includes(provider))
     return ["reasoning-effort", "anthropic-effort", "reasoning-object", "none"];
   if (provider === "anthropic") return ["anthropic-effort", "none"];
   if (["openai", "xiaomi-token-plan-cn"].includes(provider))

@@ -6,6 +6,8 @@ Drevi 现在提供可本地运行的 macOS 应用。原生外壳使用 Swift、A
 
 客户端从与 Web 版相同的 `src/`、`server/` 和 `shared/` 构建，包含画布分支输入卡片、模型上下文容量和路径占用显示，以及文件更新的 Git 记录。Git 快照沿用 Web 版的本机 Git 依赖；应用内置 Node，不内置 Git。
 
+v1.0.0 在模型连接列表顶部新增「通用接口」，可连接 OpenRouter 或其他兼容服务，选择 Chat Completions、Responses 或 Anthropic Messages。支持自动获取模型列表、手动填写完整模型 ID、读取 OpenRouter 上下文长度及保存多个模型。配置与内置供应商独立，保存后立即生效，详见 [模型配置](CONFIGURATION.md)。
+
 v0.9.9 更名为 **Drevi · 梦络**，更新捕梦网图标和中英文标语。应用标识为 `app.drevi.desktop`，主程序与安装包使用 Drevi 命名。旧版 Panel 用户需先退出旧 App，再手动安装 `Drevi.app`；旧更新器不能跨应用标识升级。Drevi 首次运行优先使用已有的 `~/Library/Application Support/Panel/`（若 Drevi 目录尚不存在），沿用原目录锁，探索、密钥、附件和工作目录保持原路径。新安装使用 `~/Library/Application Support/Drevi/`。由于应用标识变化，电脑预览可能需要重新授予屏幕录制权限。
 
 v0.9.8 调整 max 档位的像素效果，移除卡片和滑杆的整体光晕，让闪烁像素的颜色与发光保持一致。思考强度滑杆、键盘调整、主题和减少动态效果设置继续可用；三段数字版本可由已有 App 的更新器正常识别。
@@ -151,14 +153,14 @@ ZIP 不携带资源分支和扩展属性，避免生成大量 `__MACOSX` 条目�
 发布新版本并确认安装包已公开、可下载后，同步备用更新信息（标签替换为本次版本）：
 
 ```bash
-gh api repos/H0ypothesis/drevi/releases/tags/v0.9.9 > build/published-release.json
+gh api repos/H0ypothesis/drevi/releases/tags/v1.0.0 > build/published-release.json
 node scripts/update-release-feed.mjs build/published-release.json
 git add updates/macos.json
 git commit -m "chore: refresh public macOS update feed"
 git push origin main
 ```
 
-脚本只接受已发布的数字版本和带 GitHub SHA-256 摘要的本仓库安装包，保留最近 20 个版本；备用源的架构、版本、大小、下载地址与摘要验证和 API 来源相同。不要在安装包公开前更新此文件。v0.5 若因 API 限流无法自动升级，需要从 Release 手动下载一次当前版本 v0.9.9。
+脚本只接受已发布的数字版本和带 GitHub SHA-256 摘要的本仓库安装包，保留最近 20 个版本；备用源的架构、版本、大小、下载地址与摘要验证和 API 来源相同。不要在安装包公开前更新此文件。v0.5 若因 API 限流无法自动升级，需要从 Release 手动下载一次当前版本 v1.0.0。
 
 ## 验证记录与发布状态
 

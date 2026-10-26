@@ -95,6 +95,57 @@ test("provider authentication and versioned URLs match their generation protocol
   assert.equal(calls[4].headers.get("authorization"), "Bearer test-secret");
 });
 
+test("generic discovery supports OpenRouter metadata and follows draft or saved protocol without leaking the old key", async (t) => {
+  const { settings } = await setup(t);
+  const calls: { url: string; headers: Headers }[] = [];
+  t.mock.method(globalThis, "fetch", async (url: URL, options: RequestInit) => {
+    calls.push({ url: String(url), headers: new Headers(options.headers) });
+    return Response.json({
+      data: [
+        { id: "vendor/model", name: "Model", context_length: 262144 },
+        { id: "unknown", context_length: null },
+        { id: "invalid", context_length: "262144" },
+      ],
+    });
+  });
+  const catalog = await settings.discover("custom", {
+    baseUrl: "https://openrouter.ai/api/v1",
+    apiKey: "draft-key",
+  });
+  assert.equal(calls[0].url, "https://openrouter.ai/api/v1/models");
+  assert.equal(calls[0].headers.get("authorization"), "Bearer draft-key");
+  assert.equal(
+    catalog.models.find((model) => model.id === "vendor/model")?.contextWindow,
+    262144,
+  );
+  assert.ok(
+    catalog.models
+      .filter((model) => model.id !== "vendor/model")
+      .every((model) => model.contextWindow === undefined),
+  );
+  assert.deepEqual(settings.currentRegistry().getModels("custom"), []);
+  await settings.save("custom", {
+    baseUrl: "https://gateway.invalid",
+    apiKey: "saved-key",
+    model: "vendor/model",
+    protocol: "anthropic-messages",
+  });
+  await settings.discover("custom", { baseUrl: "https://gateway.invalid" });
+  assert.equal(calls[1].url, "https://gateway.invalid/v1/models");
+  assert.equal(calls[1].headers.get("x-api-key"), "saved-key");
+  assert.equal(calls[1].headers.get("anthropic-version"), "2023-06-01");
+  await settings.discover("custom", {
+    baseUrl: "https://gateway.invalid",
+    protocol: "openai-responses",
+  });
+  assert.equal(calls[2].headers.get("authorization"), "Bearer saved-key");
+  await assert.rejects(
+    settings.discover("custom", { baseUrl: "https://different.invalid/v1" }),
+    /URL 已改变/,
+  );
+  assert.equal(calls.length, 3);
+});
+
 test("Paperbypass discovers slug-based model IDs and display names without changing saved settings", async (t) => {
   const { settings, directory } = await setup(t);
   await settings.save("paperbypass", {

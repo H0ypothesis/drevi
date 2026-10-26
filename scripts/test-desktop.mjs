@@ -195,6 +195,9 @@ try {
   );
   const providerSettings = await api("/api/model-providers");
   assert.ok(providerSettings.every((provider) => !provider.apiKeyConfigured));
+  assert.equal(providerSettings[0].id, "custom");
+  assert.equal(providerSettings[0].protocol, "openai-completions");
+  assert.deepEqual(providerSettings[0].models, []);
   modelService = createHttpServer((request, response) => {
     assert.ok(["/v1/models", "/api/v1/models"].includes(request.url));
     assert.equal(request.headers.authorization, "Bearer catalog-test-key");
@@ -226,6 +229,14 @@ try {
     models: [{ id: "glm-5.3-flash", name: "glm-5.3-flash" }],
     truncated: false,
   });
+  assert.deepEqual(
+    await api("/api/model-providers/custom/models", {
+      baseUrl: `http://127.0.0.1:${modelService.address().port}/v1`,
+      apiKey: "catalog-test-key",
+      protocol: "openai-completions",
+    }),
+    catalog,
+  );
   const paperCatalog = await api("/api/model-providers/paperbypass/models", {
     baseUrl: `http://127.0.0.1:${modelService.address().port}/api`,
     apiKey: "catalog-test-key",
@@ -270,6 +281,36 @@ try {
     ),
   );
   assert.ok(!JSON.stringify(configured).includes(testKey));
+  for (const protocol of [
+    "openai-completions",
+    "openai-responses",
+    "anthropic-messages",
+  ]) {
+    const custom = await api(
+      "/api/model-providers/custom",
+      {
+        baseUrl: "http://127.0.0.1:9/v1",
+        model: "vendor/desktop-model",
+        apiKey: testKey,
+        protocol,
+      },
+      "PUT",
+    );
+    assert.equal(custom.provider.protocol, protocol);
+    assert.ok(
+      custom.models.some(
+        (model) =>
+          model.id === "custom/vendor/desktop-model" && model.available,
+      ),
+    );
+    assert.ok(!JSON.stringify(custom).includes(testKey));
+  }
+  assert.deepEqual(
+    (await api("/api/model-providers")).find(
+      (provider) => provider.id === "openai",
+    ),
+    configured.provider,
+  );
   const project = join(directory, "project");
   await mkdir(project);
   const created = await api("/api/workspaces", {

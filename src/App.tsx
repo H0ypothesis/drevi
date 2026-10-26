@@ -3304,8 +3304,12 @@ function Settings({
   } | null>(null);
   const [saved, setSaved] = useState("");
   const providers = [
+    "custom",
+    "demo",
     ...new Set(
-      models.filter((model) => !model.demo).map((model) => model.provider),
+      models
+        .filter((model) => !model.demo && model.provider !== "custom")
+        .map((model) => model.provider),
     ),
   ];
   return (
@@ -3323,20 +3327,27 @@ function Settings({
           {saved}
         </p>
       )}
-      <div className="provider-row">
-        <span className="provider-logo">π</span>
-        <div>
-          <b>Pi Demo</b>
-          <small>本地演示 · 无需密钥 · 预设回复</small>
-        </div>
-        <span className="provider-connected">
-          <Check size={12} />
-          已就绪
-        </span>
-      </div>
       {providers.map((provider) => {
+        if (provider === "demo")
+          return (
+            <div className="provider-row" key="demo">
+              <span className="provider-logo">π</span>
+              <div>
+                <b>Pi Demo</b>
+                <small>本地演示 · 无需密钥 · 预设回复</small>
+              </div>
+              <span className="provider-connected">
+                <Check size={12} />
+                已就绪
+              </span>
+            </div>
+          );
         const options = models.filter((model) => model.provider === provider);
         const first = options[0];
+        const name =
+          provider === "custom"
+            ? "通用接口"
+            : (first?.providerName ?? provider);
         return (
           <div className="provider-row" key={provider}>
             <span className={`provider-logo ${provider}`}>
@@ -3346,23 +3357,25 @@ function Settings({
                   ? "◎"
                   : provider === "google"
                     ? "G"
-                    : (first?.providerName ?? provider)
-                        .slice(0, 1)
-                        .toUpperCase()}
+                    : name.slice(0, 1).toUpperCase()}
             </span>
             <div>
-              <b>{first?.providerName ?? provider}</b>
-              <small>{first?.envVar}</small>
+              <b>{name}</b>
+              <small>
+                {provider === "custom"
+                  ? "OpenRouter · 自定义 API URL 与协议"
+                  : first?.envVar}
+              </small>
             </div>
             <button
               type="button"
-              aria-label={`配置 ${first?.providerName ?? provider}`}
+              aria-label={`配置 ${name}`}
               aria-haspopup="dialog"
               onClick={() => {
                 setSaved("");
                 setEditingProvider({
                   id: provider,
-                  name: first?.providerName ?? provider,
+                  name,
                 });
               }}
               className={

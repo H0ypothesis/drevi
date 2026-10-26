@@ -115,7 +115,9 @@ export async function discoverModels(
             : id;
         const contextWindow = validContextWindow(entry.contextWindow)
           ? entry.contextWindow
-          : models.get(id)?.contextWindow;
+          : validContextWindow(entry.context_length)
+            ? entry.context_length
+            : models.get(id)?.contextWindow;
         models.set(id, {
           id,
           name,

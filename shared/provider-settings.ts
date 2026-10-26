@@ -33,7 +33,6 @@ export interface ThinkingControls {
 }
 export interface ThinkingProbeInput extends DiscoverProviderModels {
   model: string;
-  protocol?: ProviderProtocol;
   format: ThinkingFormat;
 }
 export interface ThinkingProbeResult {
@@ -58,7 +57,16 @@ export interface ThinkingProbeResult {
 export type ProviderProtocol =
   | "auto"
   | "openai-completions"
-  | "openai-responses";
+  | "openai-responses"
+  | "anthropic-messages";
+
+export function providerProtocols(id: string): ProviderProtocol[] {
+  if (id === "custom")
+    return ["openai-completions", "openai-responses", "anthropic-messages"];
+  if (id === "openai")
+    return ["auto", "openai-completions", "openai-responses"];
+  return [];
+}
 
 export type ContextWindowSource = "builtin" | "configured" | "fallback";
 export const MAX_CONTEXT_WINDOW = 100_000_000;
@@ -114,6 +122,7 @@ export interface SaveProviderSettings {
 export interface DiscoverProviderModels {
   baseUrl: string;
   apiKey?: string;
+  protocol?: ProviderProtocol;
 }
 
 export interface ProviderModelCatalog {

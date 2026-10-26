@@ -31,7 +31,10 @@ async function setup(t: TestContext) {
 test("provider settings preserve catalogs and capabilities, retain custom IDs, and persist private credentials", async (t) => {
   const { directory, settings } = await setup(t);
   const baseline = settings.currentRegistry().getModels();
-  assert.equal(settings.list().length, 6);
+  assert.equal(settings.list().length, 7);
+  assert.equal(settings.list()[0].id, "custom");
+  assert.deepEqual(settings.list()[0].models, []);
+  assert.equal(settings.list()[0].protocol, "openai-completions");
   assert.ok(settings.list().every((provider) => !provider.apiKeyConfigured));
   for (const definition of modelProviders) {
     const key = `local-secret-${definition.id}`;
@@ -404,85 +407,158 @@ function completionResponse(model: string, text = "Saved connection works") {
   );
 }
 
-test("custom OpenAI model actually streams through the saved URL and key immediately and after restart", async (t) => {
-  const { directory } = await setup(t);
-  const originalFetch = globalThis.fetch;
-  t.after(() => {
-    globalThis.fetch = originalFetch;
-  });
-  const calls: { url: string; key: string | null; model: string }[] = [];
-  globalThis.fetch = async (input, init) => {
-    const request = new Request(input, init);
-    const body = (await request.json()) as { model: string };
-    calls.push({
-      url: request.url,
-      key: request.headers.get("authorization"),
-      model: body.model,
+for (const providerId of ["openai", "custom"]) {
+  test(`${providerId} custom model actually streams through the saved URL and key immediately and after restart`, async (t) => {
+    const { directory } = await setup(t);
+    const originalFetch = globalThis.fetch;
+    t.after(() => {
+      globalThis.fetch = originalFetch;
     });
-    return completionResponse(body.model);
-  };
-  const runtime = new PiRuntime();
-  await runtime.initProviderSettings(directory);
-  const initialModels = runtime.models();
-  await runtime.saveProviderSettings("openai", {
-    baseUrl: "https://local-mock.invalid/v1/",
-    model: "my-custom-model",
-    apiKey: "local-test-api-key",
-    contextWindow: 262144,
+    const calls: { url: string; key: string | null; model: string }[] = [];
+    globalThis.fetch = async (input, init) => {
+      const request = new Request(input, init);
+      const body = (await request.json()) as { model: string };
+      calls.push({
+        url: request.url,
+        key: request.headers.get("authorization"),
+        model: body.model,
+      });
+      return completionResponse(body.model);
+    };
+    const runtime = new PiRuntime();
+    await runtime.initProviderSettings(directory);
+    const initialModels = runtime.models();
+    await runtime.saveProviderSettings(providerId, {
+      baseUrl: "https://local-mock.invalid/v1/",
+      model: "vendor/my-custom-model",
+      apiKey: "local-test-api-key",
+      contextWindow: 262144,
+    });
+    const option = runtime
+      .models()
+      .find((model) => model.id === `${providerId}/vendor/my-custom-model`);
+    assert.ok(option?.available);
+    assert.equal(option.contextWindow, 262144);
+    assert.equal(option.contextWindowSource, "configured");
+    assert.equal(option.supportsImages, false);
+    assert.deepEqual(option.thinkingLevels, ["off"]);
+    assert.equal(runtime.models().length, initialModels.length + 1);
+    const budgets: number[] = [];
+    const contextOptions = {
+      autoCompact: true,
+      sources: [{ nodeId: "current", revision: 0, messageCount: 0 }],
+      onState: async (state: { contextWindow?: number }) => {
+        if (state.contextWindow !== undefined)
+          budgets.push(state.contextWindow);
+      },
+    };
+    const result = await runtime.run(
+      { model: option.id, thinking: "off" },
+      [],
+      "hello",
+      AbortSignal.timeout(10000),
+      () => {},
+      undefined,
+      contextOptions,
+    );
+    assert.equal(result.response, "Saved connection works");
+    const reloaded = new PiRuntime();
+    await reloaded.initProviderSettings(directory);
+    assert.equal(
+      reloaded.models().find((model) => model.id === option.id)?.contextWindow,
+      262144,
+    );
+    await reloaded.run(
+      { model: option.id, thinking: "off" },
+      [],
+      "hello again",
+      AbortSignal.timeout(10000),
+      () => {},
+      undefined,
+      contextOptions,
+    );
+    assert.ok(budgets.length >= 2);
+    assert.ok(budgets.every((budget) => budget === 262144));
+    assert.deepEqual(
+      calls,
+      Array.from({ length: 2 }, () => ({
+        url: "https://local-mock.invalid/v1/chat/completions",
+        key: "Bearer local-test-api-key",
+        model: "vendor/my-custom-model",
+      })),
+    );
   });
-  const option = runtime
-    .models()
-    .find((model) => model.id === "openai/my-custom-model");
-  assert.ok(option?.available);
-  assert.equal(option.contextWindow, 262144);
-  assert.equal(option.contextWindowSource, "configured");
-  assert.equal(option.supportsImages, false);
-  assert.deepEqual(option.thinkingLevels, ["off"]);
-  assert.equal(runtime.models().length, initialModels.length + 1);
-  const budgets: number[] = [];
-  const contextOptions = {
-    autoCompact: true,
-    sources: [{ nodeId: "current", revision: 0, messageCount: 0 }],
-    onState: async (state: { contextWindow?: number }) => {
-      if (state.contextWindow !== undefined) budgets.push(state.contextWindow);
-    },
-  };
-  const result = await runtime.run(
-    { model: option.id, thinking: "off" },
-    [],
-    "hello",
-    AbortSignal.timeout(10000),
-    () => {},
-    undefined,
-    contextOptions,
-  );
-  assert.equal(result.response, "Saved connection works");
-  const reloaded = new PiRuntime();
-  await reloaded.initProviderSettings(directory);
-  assert.equal(
-    reloaded.models().find((model) => model.id === option.id)?.contextWindow,
-    262144,
-  );
-  await reloaded.run(
-    { model: option.id, thinking: "off" },
-    [],
-    "hello again",
-    AbortSignal.timeout(10000),
-    () => {},
-    undefined,
-    contextOptions,
-  );
-  assert.ok(budgets.length >= 2);
-  assert.ok(budgets.every((budget) => budget === 262144));
-  assert.deepEqual(
-    calls,
-    Array.from({ length: 2 }, () => ({
-      url: "https://local-mock.invalid/v1/chat/completions",
-      key: "Bearer local-test-api-key",
-      model: "my-custom-model",
-    })),
-  );
-});
+}
+
+for (const protocol of [
+  "openai-completions",
+  "openai-responses",
+  "anthropic-messages",
+] as const) {
+  test(`generic ${protocol} persists and sends the selected wire format and credentials`, async (t) => {
+    const { directory, settings } = await setup(t);
+    await settings.save("custom", {
+      baseUrl: "https://gateway.invalid/v1",
+      model: "vendor/model",
+      apiKey: "custom-test-key",
+      protocol,
+    });
+    const restarted = new ModelProviderSettings(directory);
+    await restarted.init();
+    assert.deepEqual(restarted.list(), settings.list());
+    for (const instance of [settings, restarted]) {
+      const registry = instance.currentRegistry();
+      const model = registry.getModel("custom", "vendor/model")!;
+      assert.equal(model.api, protocol);
+      let captured: Request | undefined;
+      const result = await registry.completeSimple(
+        model,
+        {
+          messages: [{ role: "user", content: "hello", timestamp: 0 }],
+        },
+        {
+          maxRetries: 0,
+          fetch: async (input, init) => {
+            captured = new Request(input, init);
+            return Response.json(
+              { error: { message: "local wire capture" } },
+              { status: 400 },
+            );
+          },
+        },
+      );
+      assert.equal(result.stopReason, "error");
+      assert.match(result.errorMessage!, /local wire capture/);
+      assert.ok(captured);
+      assert.equal(
+        new URL(captured.url).origin + new URL(captured.url).pathname,
+        `https://gateway.invalid/v1/${
+          protocol === "openai-completions"
+            ? "chat/completions"
+            : protocol === "openai-responses"
+              ? "responses"
+              : "messages"
+        }`,
+      );
+      assert.equal(
+        captured.headers.get(
+          protocol === "anthropic-messages" ? "x-api-key" : "authorization",
+        ),
+        protocol === "anthropic-messages"
+          ? "custom-test-key"
+          : "Bearer custom-test-key",
+      );
+      const body = (await captured.json()) as Record<string, unknown>;
+      assert.equal(body.model, "vendor/model");
+      assert.equal(body.stream, true);
+      assert.ok(
+        Array.isArray(
+          protocol === "openai-responses" ? body.input : body.messages,
+        ),
+      );
+    }
+  });
+}
 
 test("model settings API masks secrets, enforces same origin, and excludes credentials from state and exports", async (t) => {
   const { directory } = await setup(t);

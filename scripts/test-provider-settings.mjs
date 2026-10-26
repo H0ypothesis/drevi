@@ -13,10 +13,10 @@ const bundle = await build({
       import { createRoot } from "react-dom/client";
       import { ProviderSettingsDialog } from "./src/ProviderSettingsDialog";
       export { act };
-      export function mount(onSaved) {
+      export function mount(onSaved, provider) {
         const root = createRoot(document.getElementById("root"));
-        root.render(<StrictMode><ProviderSettingsDialog providerId="openai"
-          providerName="OpenAI" onClose={() => {}} onSaved={onSaved} /></StrictMode>);
+        root.render(<StrictMode><ProviderSettingsDialog providerId={provider.id}
+          providerName={provider.name} onClose={() => {}} onSaved={onSaved} /></StrictMode>);
         return root;
       }
     `,
@@ -95,8 +95,8 @@ async function mount(t, configured = false, providerChanges = {}) {
     assert.equal(options.method, "POST");
     assert.ok(
       [
-        "/api/model-providers/openai/models",
-        "/api/model-providers/openai/thinking-probe",
+        `/api/model-providers/${provider.id}/models`,
+        `/api/model-providers/${provider.id}/thinking-probe`,
       ].includes(url),
     );
     return new Promise((resolve) => {
@@ -121,7 +121,7 @@ async function mount(t, configured = false, providerChanges = {}) {
     }
   });
   await act(() => {
-    app = window.ProviderTest.mount((models) => saved.push(models));
+    app = window.ProviderTest.mount((models) => saved.push(models), provider);
   });
   const document = window.document;
   const find = (selector) => {
@@ -230,6 +230,66 @@ test("draft URL and key auto-discover after debounce; search and selection save 
     protocol: "auto",
   });
   assert.deepEqual(ui.saved, [[{ id: "selected" }]]);
+});
+
+test("generic connection starts empty, discovers OpenRouter models and saves the selected protocol", async (t) => {
+  const ui = await mount(t, false, {
+    id: "custom",
+    name: "通用接口",
+    baseUrl: "",
+    model: "",
+    models: [],
+    protocol: "openai-completions",
+  });
+  assert.equal(ui.find("#provider-base-url").value, "");
+  assert.equal(ui.find("#provider-model").value, "");
+  assert.equal(ui.find("#provider-protocol").value, "openai-completions");
+  assert.deepEqual(
+    Array.from(ui.find("#provider-protocol").options, (option) => option.value),
+    ["openai-completions", "openai-responses", "anthropic-messages"],
+  );
+  await ui.edit("#provider-base-url", "https://openrouter.ai/api/v1");
+  await ui.edit("#provider-api-key", "router-key");
+  await ui.flush();
+  assert.equal(ui.requests[0].url, "/api/model-providers/custom/models");
+  assert.equal(ui.requests[0].body.protocol, "openai-completions");
+  await ui.deliver(ui.requests[0], {
+    models: [{ id: "vendor/model", name: "Model", contextWindow: 262144 }],
+    truncated: false,
+  });
+  await ui.click('[aria-label="展开模型列表"]');
+  await ui.click('[role="option"]');
+  await ui.click('button[type="submit"]');
+  assert.equal(ui.requests[1].url, "/api/model-providers/custom");
+  assert.deepEqual(ui.requests[1].body, {
+    baseUrl: "https://openrouter.ai/api/v1",
+    apiKey: "router-key",
+    model: "vendor/model",
+    contextWindow: 262144,
+    protocol: "openai-completions",
+  });
+});
+
+test("generic protocol changes refresh discovery and reach save and thinking probe requests", async (t) => {
+  const ui = await mount(t, true, {
+    id: "custom",
+    name: "通用接口",
+    protocol: "openai-completions",
+    supportsThinkingProbe: true,
+  });
+  await ui.flush();
+  const old = ui.requests[0];
+  await ui.select("#provider-protocol", "anthropic-messages");
+  assert.equal(old.signal.aborted, true);
+  await ui.flush();
+  assert.equal(ui.requests[1].body.protocol, "anthropic-messages");
+  await ui.click('button[type="submit"]');
+  assert.equal(ui.requests.at(-1).body.protocol, "anthropic-messages");
+  await ui.select("#provider-protocol", "openai-responses");
+  await ui.click('button[type="submit"]');
+  assert.equal(ui.requests.at(-1).body.protocol, "openai-responses");
+  await ui.click(".thinking-probe-run");
+  assert.equal(ui.requests.at(-1).body.protocol, "openai-responses");
 });
 
 test("saved-key discovery aborts on URL change; stale responses cannot replace the new catalog", async (t) => {
