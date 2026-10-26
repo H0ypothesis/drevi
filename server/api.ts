@@ -353,7 +353,15 @@ export function createApi(
         );
         return true;
       }
-      if (request.method === "GET" && url.pathname === "/api/state")
+      if (request.method === "GET" && url.pathname === "/api/activity") {
+        // Native update/quit checks must not decode arbitrary conversation text.
+        let activeNodeCount = 0;
+        for (const workspace of store.data.workspaces)
+          for (const node of workspace.nodes)
+            if (node.status === "running" || node.status === "queued")
+              activeNodeCount++;
+        json(response, 200, { activeNodeCount });
+      } else if (request.method === "GET" && url.pathname === "/api/state")
         json(response, 200, store.snapshot());
       else if (request.method === "GET" && url.pathname === "/api/models")
         json(response, 200, runtime.models());

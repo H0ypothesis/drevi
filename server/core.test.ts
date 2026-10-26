@@ -389,6 +389,47 @@ test("HTTP validates origin, node config, coordinates, and exports the chosen pa
   }
 });
 
+test("native activity checks count all running and queued nodes without reading history", async () => {
+  const env = await setup();
+  const other = createWorkspace("Other", "truncated emoji: \ud83d");
+  env.store.data.workspaces.push(other);
+  const root = env.workspace.nodes[0];
+  env.workspace.nodes.push(
+    ...(["running", "queued", "completed", "failed", "cancelled"] as const).map(
+      (status) => ({ ...root, id: randomUUID(), status, response: "\ud83d" }),
+    ),
+  );
+  other.nodes.push({ ...root, id: randomUUID(), status: "running" });
+  env.store.snapshot = () => {
+    throw new Error("Activity checks must not serialize conversation history");
+  };
+  const handler = createApi(env.store, env.runtime, env.scheduler);
+  const server = createServer((request, response) => {
+    void handler(request, response);
+  });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  assert.ok(address && typeof address !== "string");
+  const url = `http://127.0.0.1:${address.port}/api/activity`;
+  try {
+    const active = await fetch(url);
+    assert.equal(active.status, 200);
+    assert.equal(active.headers.get("cache-control"), "no-store");
+    assert.deepEqual(await active.json(), { activeNodeCount: 3 });
+    for (const workspace of env.store.data.workspaces)
+      for (const node of workspace.nodes) node.status = "completed";
+    assert.deepEqual(await (await fetch(url)).json(), { activeNodeCount: 0 });
+    const blocked = await fetch(url, {
+      headers: { Origin: "https://evil.example" },
+    });
+    assert.equal(blocked.status, 403);
+  } finally {
+    server.closeAllConnections();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+    await env.cleanup();
+  }
+});
+
 test("actual Pi Agent streams demo output and can be aborted without credentials", async () => {
   const runtime = new PiRuntime();
   assert.ok(runtime.models().some((model) => model.provider === "anthropic"));

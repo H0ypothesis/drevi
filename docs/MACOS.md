@@ -6,6 +6,8 @@ Drevi 现在提供可本地运行的 macOS 应用。原生外壳使用 Swift、A
 
 客户端从与 Web 版相同的 `src/`、`server/` 和 `shared/` 构建，包含画布分支输入卡片、模型上下文容量和路径占用显示，以及文件更新的 Git 记录。Git 快照沿用 Web 版的本机 Git 依赖；应用内置 Node，不内置 Git。
 
+v1.0.1 修复点击更新后提示「暂时无法读取任务状态」的问题。原生客户端改用只返回任务数量的接口，历史记录中的不完整 Unicode 字符不再影响更新、退出和重启检查。有运行或排队任务时仍会阻止更新。受影响的旧版需要退出后手动覆盖安装一次；数据和模型配置沿用原目录。
+
 v1.0.0 在模型连接列表顶部新增「通用接口」，可连接 OpenRouter 或其他兼容服务，选择 Chat Completions、Responses 或 Anthropic Messages。支持自动获取模型列表、手动填写完整模型 ID、读取 OpenRouter 上下文长度及保存多个模型。配置与内置供应商独立，保存后立即生效，详见 [模型配置](CONFIGURATION.md)。
 
 v0.9.9 更名为 **Drevi · 梦络**，更新捕梦网图标和中英文标语。应用标识为 `app.drevi.desktop`，主程序与安装包使用 Drevi 命名。旧版 Panel 用户需先退出旧 App，再手动安装 `Drevi.app`；旧更新器不能跨应用标识升级。Drevi 首次运行优先使用已有的 `~/Library/Application Support/Panel/`（若 Drevi 目录尚不存在），沿用原目录锁，探索、密钥、附件和工作目录保持原路径。新安装使用 `~/Library/Application Support/Drevi/`。由于应用标识变化，电脑预览可能需要重新授予屏幕录制权限。

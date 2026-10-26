@@ -908,18 +908,7 @@ final class DreviApp: NSObject, NSApplicationDelegate, NSWindowDelegate,
 
     private func activeNodeCount(completion: @escaping (Int?) -> Void) {
         guard let base = serviceURL, service?.isRunning == true else { completion(0); return }
-        var request = URLRequest(url: base.appendingPathComponent("api/state"))
-        request.timeoutInterval = 3
-        URLSession.shared.dataTask(with: request) { data, response, _ in
-            let state = data.flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }
-            let workspaces = state?["workspaces"] as? [[String: Any]]
-            let count = (response as? HTTPURLResponse)?.statusCode == 200 ? workspaces.map { items in
-                items.flatMap { $0["nodes"] as? [[String: Any]] ?? [] }.filter {
-                    ["running", "queued"].contains($0["status"] as? String ?? "")
-                }.count
-            } : nil
-            DispatchQueue.main.async { completion(count) }
-        }.resume()
+        ServiceActivity.read(from: base, completion: completion)
     }
 
     @objc private func retryService() {

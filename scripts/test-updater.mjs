@@ -15,6 +15,7 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { createServer } from "node:http";
 import {
   checkForUpdate,
   compareVersions,
@@ -75,6 +76,80 @@ test(
     await run(binary, [process.execPath], { timeout: 10_000 });
   },
 );
+test(
+  "native activity checks use only the count and fail closed on invalid or unavailable state",
+  { skip: process.platform !== "darwin" },
+  async (t) => {
+    const directory = await temp(t);
+    const root = fileURLToPath(new URL("../", import.meta.url));
+    const run = promisify(execFile);
+    const binary = join(directory, "activity-test");
+    await run(
+      "xcrun",
+      [
+        "swiftc",
+        "-swift-version",
+        "5",
+        "-module-cache-path",
+        join(root, "build/swift-cache"),
+        join(root, "desktop/macos/ServiceActivity.swift"),
+        join(root, "scripts/test-service-activity.swift"),
+        "-o",
+        binary,
+      ],
+      { timeout: 60_000 },
+    );
+    let body = { activeNodeCount: 0 },
+      status = 200,
+      timeout = false;
+    const paths = [];
+    const server = createServer((request, response) => {
+      paths.push(request.url);
+      if (timeout) return;
+      response.writeHead(status, {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store",
+      });
+      response.end(
+        JSON.stringify(
+          request.url === "/api/state"
+            ? {
+                workspaces: [
+                  { nodes: [{ status: "completed", response: "\ud83d" }] },
+                ],
+              }
+            : body,
+        ),
+      );
+    });
+    await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+    t.after(() => {
+      server.closeAllConnections();
+      server.close();
+    });
+    const base = `http://127.0.0.1:${server.address().port}`;
+    for (const [value, expected] of [
+      [{ activeNodeCount: 0 }, "0"],
+      [{ activeNodeCount: 2 }, "2"],
+      [{ activeNodeCount: -1 }, "nil"],
+      [{ activeNodeCount: 0.5 }, "nil"],
+      [{ activeNodeCount: "0" }, "nil"],
+      [{ activeNodeCount: false }, "nil"],
+      [{}, "nil"],
+    ]) {
+      body = value;
+      await run(binary, [base, expected], { timeout: 10_000 });
+    }
+    body = { activeNodeCount: 0 };
+    status = 500;
+    await run(binary, [base, "nil"], { timeout: 10_000 });
+    timeout = true;
+    await run(binary, [base, "nil"], { timeout: 10_000 });
+    assert.equal(paths.length, 9);
+    assert.ok(paths.every((path) => path === "/api/activity"));
+  },
+);
+
 function release(version = "v0.6", overrides = {}) {
   return {
     tag_name: version,

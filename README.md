@@ -10,7 +10,7 @@
 
 <!-- 发布新版时同步更新安装包链接。 -->
 <p align="center">
-  <a href="https://github.com/H0ypothesis/drevi/releases/download/v1.0.0/Drevi-mac-arm64.zip">
+  <a href="https://github.com/H0ypothesis/drevi/releases/download/v1.0.1/Drevi-mac-arm64.zip">
     <img src="docs/assets/download-macos.svg" width="304" height="80" alt="一键下载 Drevi v1.0.0 · Apple Silicon · macOS 13.5 及以上">
   </a>
 </p>
@@ -53,11 +53,13 @@
 3. 使用真实模型时，打开左下角 **「模型连接」→「未配置」**，填写 **API URL、API Key、Model** 并保存，配置立即生效。
 4. 新建探索，写下主题与背景；点击卡片右侧的 **`+`** 开始提问，或选中历史节点继续分支。
 
-当前公开下载版本为 **v1.0.0**，安装包面向 **Apple Silicon（arm64），macOS 13.5 及以上**。这是采用本地 ad-hoc 签名的预览版，尚未完成 Apple 公证；Intel 版本暂未提供下载。安装与快捷键说明见 [macOS 客户端文档](docs/MACOS.md)。
+当前公开下载版本为 **v1.0.1**，安装包面向 **Apple Silicon（arm64），macOS 13.5 及以上**。这是采用本地 ad-hoc 签名的预览版，尚未完成 Apple 公证；Intel 版本暂未提供下载。安装与快捷键说明见 [macOS 客户端文档](docs/MACOS.md)。
 
 按住顶部空白区域可拖动窗口，双击可放大到可用桌面区域，再次双击恢复原尺寸。模型配置也可通过 `⌘,` 打开。
 
 **v0.5 起支持 App 内更新**：每天自动检查 GitHub Release，发现新版后在左下角版本号旁显示「有更新」。点击即可下载、校验、替换并重启，探索和 API 配置会保留；有运行任务时需先等待完成。也可使用「Drevi → 检查更新…」手动检查。
+
+**v1.0.1 修复本地更新按钮**：更新、退出和重启前只读取运行任务数量，避免历史文本中的不完整 Unicode 字符导致检查失败。若旧版点击更新提示无法读取任务状态，请退出后手动安装此版本，探索和模型配置会保留。
 
 **v1.0.0 新增通用模型连接**：在模型连接列表顶部配置 OpenRouter 或其他兼容服务，自定义 API URL、Key 和模型 ID，选择 Chat Completions、Responses 或 Anthropic Messages。支持获取模型列表、带入 OpenRouter 上下文预算，以及保存多个模型。详见 [模型配置](docs/CONFIGURATION.md)。
 

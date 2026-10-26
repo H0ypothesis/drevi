@@ -87,6 +87,7 @@ run("xcrun", [
   join(root, "build/swift-cache"),
   "desktop/macos/Drevi.swift",
   "desktop/macos/Updater.swift",
+  "desktop/macos/ServiceActivity.swift",
   "desktop/macos/CuaPreview.swift",
   "-o",
   join(contents, "MacOS/Drevi"),

@@ -95,6 +95,7 @@ async function api(path, body, method = body ? "POST" : "GET") {
 try {
   await start();
   const initialUrl = url;
+  assert.deepEqual(await api("/api/activity"), { activeNodeCount: 0 });
   assert.match(await (await fetch(url)).text(), /<div id="root">/);
   const nativeCatalog = await api("/api/subagent-profiles");
   // Detached runners load copied native modules rather than the esbuild bundle.
